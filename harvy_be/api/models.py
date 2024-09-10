@@ -32,7 +32,9 @@ class UserInfo(AbstractBaseUser, PermissionsMixin):
     user_corptype = models.CharField(max_length=20, verbose_name='회사유형')
     user_signin = models.DateTimeField(auto_now_add=True, verbose_name='가입일')
     
+    # 계정 활성화 유무
     is_active = models.BooleanField(default=True)
+    # 관리자 권한 유무
     is_staff = models.BooleanField(default=False)
 
     objects = UserInfoManager()
@@ -44,6 +46,7 @@ class UserInfo(AbstractBaseUser, PermissionsMixin):
         return self.user_email
 
     class Meta:
+        db_table = 'userinfo'
         verbose_name = '사용자'
         verbose_name_plural = '사용자들'
 
@@ -57,6 +60,9 @@ class QnA(models.Model):
     answer_desc = models.TextField(blank=True, null=True, verbose_name='답변 내용')
     answered_at = models.DateTimeField(blank=True, null=True, verbose_name='답변 작성일')
 
+    class Meta:
+        db_table = 'qna'
+
     def __str__(self):
         return self.question_title
 
@@ -67,6 +73,9 @@ class PortfolioBoard(models.Model):
     board_title = models.TextField(verbose_name='글 제목')
     board_desc = models.TextField(blank=True, null=True, verbose_name='글 내용')
     board_write = models.DateTimeField(auto_now_add=True, verbose_name='글 작성일')
+
+    class Meta:
+        db_table = 'portfolioboard'
 
     def __str__(self):
         return self.board_title
@@ -79,6 +88,9 @@ class PortfolioFiles(models.Model):
     file_size = models.IntegerField(blank=True, null=True, verbose_name='파일 크기 (바이트)')
     file_type = models.CharField(max_length=50, blank=True, null=True, verbose_name='파일 MIME 타입')
     upload_date = models.DateTimeField(auto_now_add=True, verbose_name='파일 업로드 일시')
+
+    class Meta:
+        db_table = 'portfoliofiles'
 
     def __str__(self):
         return self.file_name
@@ -96,6 +108,7 @@ class PjTimeline(models.Model):
     order_num = models.IntegerField(blank=True, null=True, verbose_name='표시 순서')
 
     class Meta:
+        db_table = 'pjtimeline'
         ordering = ['order_num', '-date']
 
     def __str__(self):
