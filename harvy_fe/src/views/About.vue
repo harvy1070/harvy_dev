@@ -6,13 +6,40 @@
 
         <div class="main-tabs">
             <button
-                v-for="tab in ['자격증', '경력', '기술 스택']"
+                v-for="tab in ['기본정보', '자격증', '경력', '기술 스택']"
                 :key="tab"
                 @click="selectMainTab(tab)"
                 :class="{ active: selectedMainTab === tab }"
             >
                 {{ tab }}
             </button>
+        </div>
+
+        <div v-if="selectedMainTab === '기본정보'" class="basic-info">
+            <div class="business-card">
+                <div class="card-left">
+                    <img src="@/assets/profile_image.jpg" alt="Profile Image" class="profile-image" />
+                </div>
+                <div class="card-right">
+                    <h2 class="name">{{ basicInfo.name }}</h2>
+                    <p class="title">Developer / Data Analyst</p>
+
+                    <p><i class="fas fa-phone"></i> {{ basicInfo.phone }}</p>
+                    <p><i class="fas fa-envelope"></i> {{ basicInfo.email }}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ basicInfo.address }}</p>
+                </div>
+            </div>
+
+            <h3><i class="fas fa-graduation-cap"></i> 학력 정보</h3>
+            <div class="education-list">
+                <div v-for="edu in basicInfo.education" :key="edu.school" class="education-item">
+                    <h4>{{ edu.school }}</h4>
+                    <p>{{ edu.degree }}</p>
+                    <p>{{ edu.period }}</p>
+                    <p>{{ edu.major }}</p>
+                    <p>{{ edu.status }}</p>
+                </div>
+            </div>
         </div>
 
         <div v-if="selectedMainTab === '자격증'" class="certifications">
@@ -32,7 +59,7 @@
                 <div class="experience-item" v-for="exp in experiences" :key="exp.company">
                     <div class="date">{{ exp.period }}</div>
                     <div class="content">
-                        <h4>{{ exp.company }}</h4>
+                        <h4 :style="{ color: 'black' }">{{ exp.company }}</h4>
                         <p class="position">{{ exp.position }}</p>
                         <p>{{ exp.description }}</p>
                     </div>
@@ -71,18 +98,53 @@ export default {
     name: 'AboutPage',
     data() {
         return {
-            selectedMainTab: '자격증',
+            selectedMainTab: '기본정보',
             selectedCategory: null,
+            basicInfo: {
+                name: '권승회',
+                birthDate: '1992. 01. 27.',
+                phone: '010-9364-4402',
+                email: 'harvy13@naver.com',
+                address: '인천광역시 남동구 하촌로 41 4층',
+                education: [
+                    {
+                        school: '인천정보산업고등학교',
+                        degree: '고등학교',
+                        period: '2007. 03. - 2010. 03.',
+                        major: '전산과',
+                        status: '졸업',
+                    },
+                    {
+                        school: '경기공업대학교(현 과학기술대)',
+                        degree: '전문대학',
+                        period: '2010. 03. - 2011. 03.',
+                        major: 'E비즈니스과',
+                        status: '중퇴',
+                    },
+                    {
+                        school: '학점은행제(4년제 학위)',
+                        degree: '대학교',
+                        period: '2016. 06. - 2022. 02.',
+                        major: '컴퓨터공학과',
+                        status: '졸업',
+                    },
+                ],
+            },
             certifications: [
                 {
-                    name: '전산회계 1급',
-                    date: '2011. 07. 11.',
-                    org: '한국세무사회',
+                    name: '빅데이터분석기사(필기)',
+                    date: '2024. 09. 07.',
+                    org: '한국데이터베이스진흥센터',
                 },
                 {
-                    name: 'SQLD',
-                    date: '2022. 09. 30.',
-                    org: '한국데이터베이스진흥센터',
+                    name: 'OPIC IL',
+                    date: '2024. 03. 31.',
+                    org: 'ACTFL',
+                },
+                {
+                    name: 'AICE Associate',
+                    date: '2023. 11. 03.',
+                    org: 'KT, 한국경제신문',
                 },
                 {
                     name: '정보처리기사',
@@ -90,15 +152,14 @@ export default {
                     org: '한국산업인력공단',
                 },
                 {
-                    name: 'AICE Associate',
-                    date: '2023. 11. 03.',
-                    org: 'KT, 한국경제신문',
-                },
-                { name: 'OPIC IL', date: '2024. 03. 31.', org: 'ACTFL' },
-                {
-                    name: '빅데이터분석기사(필기)',
-                    date: '2024. 09. 07.',
+                    name: 'SQLD',
+                    date: '2022. 09. 30.',
                     org: '한국데이터베이스진흥센터',
+                },
+                {
+                    name: '전산회계 1급',
+                    date: '2011. 07. 11.',
+                    org: '한국세무사회',
                 },
             ],
             experiences: [
@@ -144,10 +205,10 @@ export default {
                 {
                     name: '데이터 분석 & AI',
                     items: [
-                        { name: 'Python', level: 70 },
+                        { name: 'Python', level: 85 },
                         { name: 'Pandas/Numpy', level: 70 },
-                        { name: 'TensorFlow/Pytorch', level: 70 },
-                        { name: 'Matplotlib/Seaborn', level: 60 },
+                        { name: 'TensorFlow/Pytorch', level: 65 },
+                        { name: 'Matplotlib/Seaborn', level: 75 },
                     ],
                 },
                 {
@@ -202,10 +263,28 @@ export default {
         },
     },
     mounted() {
-        this.selectMainTab('자격증');
+        this.selectMainTab('기본정보');
     },
 };
 </script>
+
+<style>
+/* 전역 스타일 */
+.about-page {
+    font-family: 'NanumSquare', sans-serif;
+}
+
+html,
+body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+</style>
 
 <style scoped>
 .about-page {
@@ -217,6 +296,7 @@ export default {
 }
 
 .header {
+    /* position: sticky; */
     margin-top: 50px;
     text-align: center;
     margin-bottom: 2rem;
@@ -229,6 +309,10 @@ h4 {
     color: #2c3e50;
 }
 
+h4 {
+    color: #3498db;
+}
+
 h1 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
@@ -239,6 +323,124 @@ h3 {
     margin-bottom: 1rem;
     border-bottom: 2px solid #3498db;
     padding-bottom: 0.5rem;
+}
+.business-card {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.card-left {
+    flex: 0 0 150px;
+    background-color: #3498db;
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-right {
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.name {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.title {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 0.5rem;
+}
+
+.card-right p {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.card-right i {
+    margin-right: 0.5rem;
+    color: #3498db;
+    width: 15px;
+}
+
+.name {
+    margin-top: 2px;
+    font-size: 1.8rem;
+    color: #2c3e50;
+    /* margin-bottom: 0.5rem; */
+}
+
+.title {
+    font-size: 1rem;
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.contact-info p {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: #34495e;
+}
+
+.contact-info i {
+    margin-right: 0.5rem;
+    color: #3498db;
+    width: 20px;
+}
+
+@media (max-width: 768px) {
+    .business-card {
+        flex-direction: column;
+    }
+
+    .card-left {
+        max-width: 100%;
+        height: 200px;
+    }
+
+    .card-right {
+        padding: 1rem;
+    }
+}
+
+.education-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.education-item {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.education-item h4 {
+    color: #3498db;
+    margin-bottom: 0.5rem;
+}
+
+.education-item p {
+    margin: 0.25rem 0;
 }
 
 .main-tabs,
@@ -379,7 +581,12 @@ h3 {
     .about-page {
         padding: 1rem;
     }
-
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    .info-item {
+        flex-basis: 100%;
+    }
     .grid,
     .skill-grid {
         grid-template-columns: 1fr;
@@ -398,12 +605,5 @@ h3 {
         font-size: 0.9rem; /* 모바일에서는 글씨 크기를 조금 줄임 */
         padding: 0.6rem 1rem; /* 패딩도 조절 */
     }
-}
-</style>
-
-<style>
-/* 전역 스타일 */
-.about-page {
-    font-family: 'NanumSquare', sans-serif;
 }
 </style>
