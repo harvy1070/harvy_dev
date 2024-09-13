@@ -68,11 +68,14 @@ class QnA(models.Model):
 
 # Portfolio 게시판 모델 정의
 class PortfolioBoard(models.Model):
-    user = models.ForeignKey(UserInfo, on_delete=models.CASCADE, related_name='portfolios')
-    user_name = models.CharField(max_length=20, verbose_name='유저이름')
+    # user = models.ForeignKey(UserInfo, on_delete=models.CASCADE, related_name='portfolios')
+    # user_name = models.CharField(max_length=20, verbose_name='유저이름')
     board_title = models.TextField(verbose_name='글 제목')
-    board_desc = models.TextField(blank=True, null=True, verbose_name='글 내용')
-    board_write = models.DateTimeField(auto_now_add=True, verbose_name='글 작성일')
+    board_semidesc = models.TextField(null=True, blank=True, verbose_name='글 요약 내용')
+    board_desc = models.TextField(blank=True, null=True, verbose_name='글 전체 내용')
+    pf_link = models.TextField(null=True, blank=True, verbose_name='프로젝트 링크')
+    pf_date = models.DateField(null=True, blank=True, verbose_name='프로젝트 일자')
+    order_num = models.IntegerField(blank=True, null=True, verbose_name='표시 순서')
 
     class Meta:
         db_table = 'portfolioboard'

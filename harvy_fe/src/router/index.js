@@ -4,6 +4,8 @@ import AboutPage from '../views/About.vue';
 import PortfolioPage from '../views/Portfolio.vue';
 import ProjectHistoryPage from '../views/ProjectHistory.vue';
 import QnAPage from '../views/QnA.vue';
+import LoginPage from '../views/Login.vue';
+import SignupPage from '../views/Signup.vue';
 
 const routes = [
     {
@@ -30,6 +32,16 @@ const routes = [
         path: '/qna',
         name: 'QnA',
         component: QnAPage,
+    },
+    {
+        path: '/login',
+        name: 'Login',
+        component: LoginPage,
+    },
+    {
+        path: '/signup',
+        name: 'Signup',
+        component: SignupPage,
     },
 ];
 

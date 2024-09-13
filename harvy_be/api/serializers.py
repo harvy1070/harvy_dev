@@ -39,12 +39,16 @@ class QnASerializer(serializers.ModelSerializer):
 
 # Portfolio
 class PortfolioBoardSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
-
     class Meta:
         model = PortfolioBoard
-        fields = ['id', 'user', 'user_name', 'board_title', 'board_desc', 'board_write']
-        read_only_fields = ['id', 'board_write']
+        fields = ['id', 'board_title', 'board_semidesc', 'board_desc', 'pf_link', 'pf_date', 'order_num'
+        ]
+        read_only_fields = ['id']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['pf_date'] = instance.pf_date.strftime('%Y-%m-%d')  # 날짜 형식 지정
+        return representation
 
 # Pf의 File 관리
 class PortfolioFilesSerializer(serializers.ModelSerializer):
@@ -59,3 +63,22 @@ class PjTimelineSerializer(serializers.ModelSerializer):
         model = PjTimeline
         fields = ['id', 'type', 'title', 'role', 'company', 'order_company', 'description', 'date', 'order_num']
         read_only_fields = ['id']
+        
+     
+# 가입 관련
+class UserInfoCreationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = UserInfo
+        fields = ('user_email', 'user_name', 'password', 'user_tel1', 'user_tel2', 'user_addr1', 'user_addr2', 
+                  'user_corpname', 'user_corpdept', 'user_corptype')
+
+    def create(self, validated_data):
+        user = UserInfo.objects.create_user(
+            user_email=validated_data['user_email'],
+            user_name=validated_data['user_name'],
+            user_pw=validated_data['password'],
+            **{k: v for k, v in validated_data.items() if k not in ['user_email', 'user_name', 'password']}
+        )
+        return user

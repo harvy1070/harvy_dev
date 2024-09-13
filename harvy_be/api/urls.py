@@ -9,6 +9,7 @@ router = DefaultRouter()
 # URL 패턴 등록
 # ex) r'users' = /users/
 router.register(r'users', UserInfoViewSet)
+router.register(r'auth', AuthViewSet, basename='auth')
 router.register(r'qna', QnAViewSet)
 router.register(r'portfolios', PortfolioBoardViewSet)
 router.register(r'portfolio-files', PortfolioFilesViewSet)

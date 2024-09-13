@@ -21,6 +21,9 @@
                 <router-link to="/qna" class="navbar-item" :class="{ 'is-active': $route.path === '/qna' }"
                     >Q&A</router-link
                 >
+                <router-link to="/login" class="navbar-item" :class="{ 'is-active': $route.path === '/login' }"
+                    >Login</router-link
+                >
             </div>
         </div>
     </nav>

@@ -1,20 +1,77 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+from .serializers import UserInfoSerializer
+
 from .models import *
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Prefetch
+from .serializers import *
 
 class UserInfoViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
     queryset = UserInfo.objects.all()
     serializer_class = UserInfoSerializer
 
-    # IsAuthenticated를 사용하여 인증된 사용자만 접근 가능하도록 설정
-    # 사용자 정보는 민감할 수 있으므로 보안 강화
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-    # 새 UserInfo 객체 생성 시 현재 인증된 사용자와 연결
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserInfoCreationSerializer
+        return UserInfoSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(UserInfoSerializer(user).data, status=status.HTTP_201_CREATED, headers=headers)
+
+class AuthViewSet(viewsets.ViewSet):
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def login(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': UserInfoSerializer(user).data
+            })
+        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def logout(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def refresh(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            return Response({
+                'access': str(token.access_token)
+            })
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def user(self, request):
+        serializer = UserInfoSerializer(request.user)
+        return Response(serializer.data)
 
 class QnAViewSet(viewsets.ModelViewSet):
     queryset = QnA.objects.all().select_related('user')
