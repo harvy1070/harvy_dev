@@ -12,3 +12,7 @@ __pycache__/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+
+# 버전 관리
+# .env.development
+# .env.production
