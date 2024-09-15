@@ -21,7 +21,16 @@
                 <router-link to="/qna" class="navbar-item" :class="{ 'is-active': $route.path === '/qna' }"
                     >Q&A</router-link
                 >
-                <router-link to="/login" class="navbar-item" :class="{ 'is-active': $route.path === '/login' }"
+                <div v-if="isLoggedIn" class="user-menu" @blur="closeDropdown" tabindex="0">
+                    <div @click="toggleDropdown" class="user-greeting">
+                        <span class="user-name">{{ userName }}</span>
+                        <span class="greeting-text">님 반갑습니다.</span>
+                    </div>
+                    <div v-show="isDropdownOpen" class="dropdown-menu">
+                        <a @click="logout" class="dropdown-item">로그아웃</a>
+                    </div>
+                </div>
+                <router-link v-else to="/login" class="navbar-item" :class="{ 'is-active': $route.path === '/login' }"
                     >Login</router-link
                 >
             </div>
@@ -30,8 +39,45 @@
 </template>
 
 <script>
+import { computed, ref } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
 export default {
     name: 'NavBar',
+    setup() {
+        const store = useStore();
+        const router = useRouter();
+        const isDropdownOpen = ref(false);
+
+        const isLoggedIn = computed(() => store.getters['auth/isAuthenticated']);
+        const userName = computed(() => {
+            const user = store.getters['auth/currentUser'];
+            return user ? user.user_name : '';
+        });
+
+        const toggleDropdown = () => {
+            isDropdownOpen.value = !isDropdownOpen.value;
+        };
+
+        const closeDropdown = () => {
+            isDropdownOpen.value = false;
+        };
+
+        const logout = async () => {
+            await store.dispatch('auth/logout');
+            router.push('/login');
+        };
+
+        return {
+            isLoggedIn,
+            userName,
+            logout,
+            isDropdownOpen,
+            toggleDropdown,
+            closeDropdown,
+        };
+    },
 };
 </script>
 
@@ -83,6 +129,59 @@ export default {
     border-bottom: 2px solid #3498db;
 }
 
+.user-menu {
+    position: relative;
+    cursor: pointer;
+}
+
+.user-greeting {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.user-greeting:hover {
+    background-color: #f5f5f5;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #3498db;
+    margin-right: 0.3rem;
+}
+
+.greeting-text {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    min-width: 150px;
+    margin-top: 0.5rem;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
 @media (max-width: 768px) {
     .navbar-content {
         flex-direction: column;
@@ -97,6 +196,18 @@ export default {
 
     .navbar-item {
         padding: 0.5rem 0;
+    }
+
+    .user-greeting {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .dropdown-menu {
+        position: static;
+        width: 100%;
+        margin-top: 0.5rem;
+        box-shadow: none;
     }
 
     .navbar-item.is-active {
