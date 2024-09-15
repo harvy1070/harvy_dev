@@ -4,7 +4,7 @@ from .models import *
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
-        fields = ['user_id', 'user_name', 'user_email', 'user_tel1', 'user_tel2', 'user_addr1', 'user_addr2', 'user_corpname', 'user_corpdept', 'user_corptype', 'user_signin', 'is_active', 'is_staff']
+        fields = ['user_id', 'user_name', 'user_email', 'user_tel2', 'user_corpname', 'user_corpdept', 'user_signin', 'is_active', 'is_staff']
         # 읽기전용 필드 설정
         read_only_fields = ['user_id', 'user_signin']
         # Password필드는 쓰기 전용으로 설정
@@ -26,6 +26,40 @@ class UserInfoSerializer(serializers.ModelSerializer):
             instance.set_password(password) # django 암호화 기능 사용
         # update 메서드 호출하여 나머지 업데이트 
         return super().update(instance, validated_data)
+
+# 가입 관련
+class UserInfoCreationSerializer(serializers.ModelSerializer):
+    user_id = serializers.CharField(max_length=20)
+    password1 = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = UserInfo
+        fields = ('user_id', 'user_email', 'user_name', 'password1', 'password2', 'user_tel2',
+                  'user_corpname', 'user_corpdept')
+        
+    # 아이디 중복 검증
+    def validate_user_id(self, value):
+        if UserInfo.objects.filter(user_id=value).exists():
+            raise serializers.ValidationError("이미 사용 중인 아이디입니다.")
+        return value
+
+    # Password 확인 절차
+    def validate(self, data):
+        if data['password1'] != data['password2']:
+            raise serializers.ValidationError("비밀번호가 일치하지 않습니다.")
+        return data
+
+    # 비밀번호 확인을 마친 데이터로 새로운 유저 생성
+    def create(self, validated_data):
+        user = UserInfo.objects.create_user(
+            user_id=validated_data['user_id'],
+            user_email=validated_data['user_email'],
+            user_name=validated_data['user_name'],
+            password=validated_data['password1'],
+            **{k: v for k, v in validated_data.items() if k not in ['user_id', 'user_email', 'user_name', 'password1', 'password2']}
+        )
+        return user
 
 # QnA
 class QnASerializer(serializers.ModelSerializer):
@@ -65,20 +99,3 @@ class PjTimelineSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
         
      
-# 가입 관련
-class UserInfoCreationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = UserInfo
-        fields = ('user_email', 'user_name', 'password', 'user_tel1', 'user_tel2', 'user_addr1', 'user_addr2', 
-                  'user_corpname', 'user_corpdept', 'user_corptype')
-
-    def create(self, validated_data):
-        user = UserInfo.objects.create_user(
-            user_email=validated_data['user_email'],
-            user_name=validated_data['user_name'],
-            user_pw=validated_data['password'],
-            **{k: v for k, v in validated_data.items() if k not in ['user_email', 'user_name', 'password']}
-        )
-        return user

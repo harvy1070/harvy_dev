@@ -47,6 +47,8 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     )
 }
 
@@ -64,6 +66,12 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
+
+# 백엔드 인증 부분 추가
+AUTHENTICATION_BACKENDS = [
+    'api.authentication.UserIdAuthBackend',  # 커스텀 백엔드
+    'django.contrib.auth.backends.ModelBackend',  # 기본 Django 인증 백엔드
+]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

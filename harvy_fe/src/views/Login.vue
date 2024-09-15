@@ -53,7 +53,7 @@ export default {
 
 <style scoped>
 .login-page {
-    font-family: 'NanumSquare', sans-serif;
+    /* font-family: 'NanumSquare', sans-serif; */
     max-width: 800px;
     margin: 50px auto;
     padding: 2rem;
@@ -61,6 +61,7 @@ export default {
 }
 
 .login-container {
+    margin-top: 100px !important;
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);

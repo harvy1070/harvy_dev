@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,7 +9,6 @@ from .models import *
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Prefetch
-from .serializers import *
 
 class UserInfoViewSet(viewsets.ModelViewSet):
     queryset = UserInfo.objects.all()
@@ -28,6 +27,12 @@ class UserInfoViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        
+        # user_id 중복 체크
+        user_id = serializer.validated_data.get('user_id')
+        if UserInfo.objects.filter(user_id=user_id).exists():
+            raise serializers.ValidationError({"user_id": "이미 존재하는 사용자 ID입니다."})
+        
         user = serializer.save()
         headers = self.get_success_headers(serializer.data)
         return Response(UserInfoSerializer(user).data, status=status.HTTP_201_CREATED, headers=headers)
@@ -35,9 +40,9 @@ class UserInfoViewSet(viewsets.ModelViewSet):
 class AuthViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def login(self, request):
-        username = request.data.get('username')
+        user_id = request.data.get('user_id')  # user_email 대신 user_id 사용
         password = request.data.get('password')
-        user = authenticate(username=username, password=password)
+        user = authenticate(username=user_id, password=password)  # username 파라미터에 user_id 사용
         if user:
             refresh = RefreshToken.for_user(user)
             return Response({

@@ -3,44 +3,38 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 
 # 사용자 생성 로직 관리(일반유저, super유저 구분)
 class UserInfoManager(BaseUserManager):
-    def create_user(self, user_email, user_name, user_pw, **extra_fields):
+    def create_user(self, user_id, user_email, user_name, password, **extra_fields):
+        if not user_id:
+            raise ValueError('사용자 ID 필드를 설정해야 합니다.')
         if not user_email:
-            raise ValueError('The Email field must be set')
+            raise ValueError('Email 필드를 설정해야 합니다.')
         email = self.normalize_email(user_email)
-        user = self.model(user_email=email, user_name=user_name, **extra_fields)
-        user.set_password(user_pw)
+        user = self.model(user_id=user_id, user_email=email, user_name=user_name, **extra_fields)
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, user_email, user_name, user_pw, **extra_fields):
+    def create_superuser(self, user_id, user_email, user_name, password, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
-        return self.create_user(user_email, user_name, user_pw, **extra_fields)
-
+        return self.create_user(user_id, user_email, user_name, password, **extra_fields)
+    
 # 유저정보 모델 정의
 class UserInfo(AbstractBaseUser, PermissionsMixin):
-    user_id = models.AutoField(primary_key=True, verbose_name='ID')
+    user_id = models.CharField(max_length=20, primary_key=True, unique=True, verbose_name='ID')
     user_name = models.CharField(max_length=20, verbose_name='유저이름')
     user_email = models.EmailField(unique=True, verbose_name='이메일')
-    user_tel1 = models.CharField(max_length=20, blank=True, null=True, verbose_name='유선번호')
     user_tel2 = models.CharField(max_length=20, verbose_name='무선번호(핸드폰)')
-    user_addr1 = models.CharField(max_length=50, blank=True, null=True, verbose_name='주소')
-    user_addr2 = models.CharField(max_length=50, blank=True, null=True, verbose_name='세부주소')
     user_corpname = models.CharField(max_length=20, verbose_name='소속회사')
     user_corpdept = models.CharField(max_length=20, verbose_name='소속부서')
-    user_corptype = models.CharField(max_length=20, verbose_name='회사유형')
     user_signin = models.DateTimeField(auto_now_add=True, verbose_name='가입일')
-    
-    # 계정 활성화 유무
     is_active = models.BooleanField(default=True)
-    # 관리자 권한 유무
     is_staff = models.BooleanField(default=False)
 
     objects = UserInfoManager()
 
-    USERNAME_FIELD = 'user_email'
-    REQUIRED_FIELDS = ['user_name']
+    USERNAME_FIELD = 'user_id'  # 로그인에 사용될 필드를 'user_id'로 설정
+    REQUIRED_FIELDS = ['user_email', 'user_name'] # createsuperuser를 위한 필드
 
     def __str__(self):
         return self.user_email
