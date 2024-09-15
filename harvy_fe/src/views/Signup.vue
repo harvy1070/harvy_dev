@@ -118,7 +118,7 @@ export default {
                 const { success, message, data } = await store.dispatch('auth/signup', formData.value);
                 console.log('Signup response:', { success, message, data }); // 응답 로깅
                 if (success) {
-                    alert('회원가입이 완료되었습니다.');
+                    alert(message);
                     router.push('/login');
                 } else {
                     alert(message);
@@ -128,7 +128,7 @@ export default {
                 if (error.message.includes('dispatch')) {
                     console.error('Store dispatch error. Store state:', store);
                 }
-                alert('회원가입 중 예기치 않은 오류가 발생했습니다. 나중에 다시 시도해주세요.');
+                alert('회원가입 중 오류가 발생했습니다. 나중에 다시 시도해주세요.');
             }
         };
 

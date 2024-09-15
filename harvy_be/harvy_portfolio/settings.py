@@ -164,5 +164,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # 개발 환경에서만 사용
 CORS_ALLOW_ALL_ORIGINS = True
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+]
+
 # user 설정 추가
 AUTH_USER_MODEL = 'api.UserInfo'

@@ -11,5 +11,8 @@ library.add(faUser, faPhone, faEnvelope, faMapMarkerAlt);
 const app = createApp(App);
 
 app.use(store).use(router);
+
+// 초기 인증상태로 복원
+store.dispatch('auth/initializeAuth');
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.mount('#app');

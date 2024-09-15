@@ -3,8 +3,8 @@
         <h2>로그인</h2>
         <form @submit.prevent="login">
             <div class="form-group">
-                <label for="username">사용자명:</label>
-                <input type="text" id="username" v-model="username" required />
+                <label for="user_id">사용자 ID:</label>
+                <input type="text" id="user_id" v-model="user_id" required />
             </div>
             <div class="form-group">
                 <label for="password">비밀번호:</label>
@@ -26,24 +26,28 @@ export default {
     setup() {
         const store = useStore();
         const router = useRouter();
-        const username = ref('');
+        const user_id = ref('');
         const password = ref('');
 
         const login = async () => {
             try {
-                await store.dispatch('login', {
-                    username: username.value,
+                const result = await store.dispatch('auth/login', {
+                    user_id: user_id.value,
                     password: password.value,
                 });
-                router.push('/'); // 로그인 성공 시 홈페이지로 이동
+                if (result.success) {
+                    router.push('/'); // 로그인 성공 시 홈페이지로 이동
+                } else {
+                    alert(result.message || '로그인에 실패했습니다.');
+                }
             } catch (error) {
                 console.error('Login failed:', error);
-                // 에러 처리 로직
+                alert('로그인 중 오류가 발생했습니다.');
             }
         };
 
         return {
-            username,
+            user_id,
             password,
             login,
         };

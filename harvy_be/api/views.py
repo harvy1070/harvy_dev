@@ -10,6 +10,10 @@ from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Prefetch
 
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 class UserInfoViewSet(viewsets.ModelViewSet):
     queryset = UserInfo.objects.all()
     serializer_class = UserInfoSerializer
@@ -40,17 +44,26 @@ class UserInfoViewSet(viewsets.ModelViewSet):
 class AuthViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def login(self, request):
-        user_id = request.data.get('user_id')  # user_email 대신 user_id 사용
+        user_id = request.data.get('user_id')
         password = request.data.get('password')
-        user = authenticate(username=user_id, password=password)  # username 파라미터에 user_id 사용
-        if user:
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': UserInfoSerializer(user).data
-            })
-        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        print(f"Login attempt: user_id={user_id}")
+        print(f"Request data: {request.data}")
+        try:
+            user = User.objects.get(user_id=user_id)
+            if user.check_password(password):
+                print(f"User authenticated: {user}")
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    'user': UserInfoSerializer(user).data
+                })
+            else:
+                print(f"Authentication failed for user_id: {user_id}")
+                return Response({'error': 'ID/PW를 확인하세요.'}, status=status.HTTP_401_UNAUTHORIZED)
+        except User.DoesNotExist:
+            print(f"User not found for user_id: {user_id}")
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def logout(self, request):
