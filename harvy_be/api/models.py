@@ -94,11 +94,11 @@ class PortfolioFiles(models.Model):
 
 # 개인 연혁 관련 모델 정의 
 class PjTimeline(models.Model):
-    TYPE_CHOICES = (
-        ('career', '경력'),
-        ('project', '프로젝트'),
-    )
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES, verbose_name='항목 유형')
+    # TYPE_CHOICES = (
+    #     ('career', '경력'),
+    #     ('project', '프로젝트'),
+    # )
+    # type = models.CharField(max_length=20, choices=TYPE_CHOICES, verbose_name='항목 유형')
     title = models.CharField(max_length=100, verbose_name='프로젝트 명')
     role = models.CharField(max_length=100, blank=True, null=True, verbose_name='참여 역할')
     company = models.CharField(max_length=100, blank=True, null=True, verbose_name='소속 회사')
@@ -112,4 +112,4 @@ class PjTimeline(models.Model):
         ordering = ['order_num', '-date']
 
     def __str__(self):
-        return f"{self.get_type_display()}: {self.title} ({self.date})"
+        return f"{self.title} ({self.date})"

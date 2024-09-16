@@ -95,7 +95,7 @@ class PortfolioFilesSerializer(serializers.ModelSerializer):
 class PjTimelineSerializer(serializers.ModelSerializer):
     class Meta:
         model = PjTimeline
-        fields = ['id', 'type', 'title', 'role', 'company', 'order_company', 'description', 'date', 'order_num']
+        fields = ['id', 'title', 'role', 'company', 'order_company', 'description', 'date', 'order_num']
         read_only_fields = ['id']
         
      
