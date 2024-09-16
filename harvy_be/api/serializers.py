@@ -72,16 +72,46 @@ class QnASerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'answered_at']
 
 # Portfolio / 9. 16. type 추가(AI, 기획, 웹 개발)
+# 9. 16. 추가 수정(가시성 개선을 위한 모델 증축)
 class PortfolioBoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = PortfolioBoard
-        fields = ['id', 'user_id', 'pf_type', 'board_title', 'board_semidesc', 'board_desc', 'pf_link', 'pf_date', 'order_num'
+        fields = [
+            'id', 
+            'user',           # ForeignKey 관련 필드는 모델에서 `user`로 정의됨.
+            'pf_type',        # 포트폴리오 유형
+            'board_title',    # 프로젝트 제목
+            'board_semidesc', # 프로젝트 간단 설명
+            'desc_role',      # 역할
+            'desc_info',      # 프로젝트 소개
+            'desc_tasks',     # 주요 작업 내역
+            'desc_results',   # 결과
+            'pf_link',        # 프로젝트 링크
+            'pf_start_date',  # 프로젝트 시작일
+            'pf_end_date',    # 프로젝트 종료일
+            'order_num',       # 표시 순서
+            'project_period',  # 시작 + 종료일
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'user', 'project_period']  # id 및 user 필드는 읽기 전용으로 설정.
+
+    def validate(self, data):
+        if data.get('pf_end_date') and data['pf_start_date'] > data['pf_end_date']:
+            raise serializers.ValidationError("종료일은 시작일보다 늦어야 합니다.")
+        return data
+
+    def get_project_period(self, obj):
+        if obj.pf_start_date:
+            start = obj.pf_start_date.strftime('%Y. %m. %d.')
+            if obj.pf_end_date:
+                end = obj.pf_end_date.strftime('%Y. %m. %d.')
+                return f"{start} ~ {end}"
+            return f"{start} ~ 진행 중"
+        return None
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['pf_date'] = instance.pf_date.strftime('%Y-%m-%d')  # 날짜 형식 지정
+        representation['pf_start_date'] = instance.pf_start_date.strftime('%Y-%m-%d') if instance.pf_start_date else None
+        representation['pf_end_date'] = instance.pf_end_date.strftime('%Y-%m-%d') if instance.pf_end_date else None
         return representation
 
 # Pf의 File 관리

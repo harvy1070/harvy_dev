@@ -14,7 +14,7 @@
         <div class="board-grid">
             <div v-for="board in filteredBoards" :key="board.id" class="board-card" @click="openModal(board)">
                 <div class="card-header">
-                    <span class="category-tag">{{ board.category }}</span>
+                    <span class="category-tag">{{ board.pf_type }}</span>
                     <span class="options-menu" v-if="isAdmin" @click.stop>
                         <button @click="editBoard(board)">수정</button>
                         <button @click="deleteBoard(board.id)">삭제</button>
@@ -22,7 +22,7 @@
                 </div>
                 <h3 class="board-title">{{ board.board_title }}</h3>
                 <p class="board-semidesc">{{ board.board_semidesc }}</p>
-                <p class="board-date">{{ formatDate(board.pf_date) }}</p>
+                <p class="board-date">{{ formatDate(board.pf_start_date) }} ~ {{ formatDate(board.pf_end_date) }}</p>
             </div>
         </div>
 
@@ -30,11 +30,35 @@
         <div v-if="selectedBoard" class="modal">
             <div class="modal-content">
                 <span class="close" @click="closeModal">&times;</span>
-                <h2>{{ selectedBoard.board_title }}</h2>
-                <p>{{ selectedBoard.board_semidesc }}</p>
-                <div v-html="selectedBoard.board_desc"></div>
-                <p>프로젝트 일자: {{ formatDate(selectedBoard.pf_date) }}</p>
-                <a :href="selectedBoard.pf_link" target="_blank" rel="noopener noreferrer">프로젝트 링크</a>
+                <h2 class="modal-title">{{ selectedBoard.board_title }}</h2>
+                <div class="project-meta">
+                    <span class="project-type">{{ getProjectTypeLabel(selectedBoard.pf_type) }}</span>
+                    <span class="project-period">{{ selectedBoard.project_period }}</span>
+                </div>
+                <div class="project-section">
+                    <h3>프로젝트 소개</h3>
+                    <p>{{ selectedBoard.desc_info }}</p>
+                </div>
+                <div class="project-section">
+                    <h3>역할</h3>
+                    <p>{{ selectedBoard.desc_role }}</p>
+                </div>
+                <div class="project-section">
+                    <h3>주요 작업 내역</h3>
+                    <ul v-html="formattedTasks"></ul>
+                </div>
+                <div class="project-section">
+                    <h3>결과</h3>
+                    <ul v-html="formattedResults"></ul>
+                </div>
+                <a
+                    v-if="selectedBoard.pf_link"
+                    :href="selectedBoard.pf_link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="project-link"
+                    >프로젝트 링크</a
+                >
             </div>
         </div>
 
@@ -47,14 +71,20 @@
                 <span class="close" @click="closeAddForm">&times;</span>
                 <h2>{{ editingBoard ? '포트폴리오 수정' : '새 포트폴리오 추가' }}</h2>
                 <form @submit.prevent="submitForm">
-                    <input v-model="formData.board_title" placeholder="제목" required />
-                    <textarea v-model="formData.board_semidesc" placeholder="간단 설명" required></textarea>
-                    <textarea v-model="formData.board_desc" placeholder="상세 설명"></textarea>
-                    <input v-model="formData.pf_link" placeholder="프로젝트 링크" />
-                    <input type="date" v-model="formData.pf_date" required />
+                    <input v-model="formData.board_title" placeholder="프로젝트 제목" required />
+                    <textarea v-model="formData.board_semidesc" placeholder="프로젝트 간단 설명" required></textarea>
+                    <textarea v-model="formData.desc_role" placeholder="역할"></textarea>
+                    <textarea v-model="formData.desc_info" placeholder="프로젝트 소개"></textarea>
+                    <textarea v-model="formData.desc_tasks" placeholder="주요 작업 내역"></textarea>
+                    <textarea v-model="formData.desc_results" placeholder="결과"></textarea>
+                    <input v-model="formData.pf_link" placeholder="프로젝트 링크" type="url" />
+                    <input type="date" v-model="formData.pf_start_date" required />
+                    <input type="date" v-model="formData.pf_end_date" />
                     <input type="number" v-model.number="formData.order_num" placeholder="표시 순서" />
-                    <select v-model="formData.category">
-                        <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                    <select v-model="formData.pf_type">
+                        <option v-for="type in portfolioTypes" :key="type.value" :value="type.value">
+                            {{ type.label }}
+                        </option>
                     </select>
                     <button type="submit">{{ editingBoard ? '수정' : '추가' }}</button>
                 </form>
@@ -64,13 +94,18 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/services/api';
 
 export default {
     name: 'PortfolioBoard',
     data() {
         return {
-            categories: ['전체', '기획', 'AI', '웹 개발'],
+            categories: ['전체', 'AI', '기획', '웹 개발'],
+            portfolioTypes: [
+                { value: 'AI', label: 'AI' },
+                { value: 'Planning', label: '기획' },
+                { value: 'WEB_DEV', label: '웹 개발' },
+            ],
             selectedCategory: '전체',
             boards: [],
             selectedBoard: null,
@@ -79,11 +114,15 @@ export default {
             formData: {
                 board_title: '',
                 board_semidesc: '',
-                board_desc: '',
+                desc_role: '',
+                desc_info: '',
+                desc_tasks: '',
+                desc_results: '',
                 pf_link: '',
-                pf_date: '',
+                pf_start_date: '',
+                pf_end_date: '',
                 order_num: null,
-                category: '기획',
+                pf_type: 'AI',
             },
             editingBoard: null,
         };
@@ -93,34 +132,50 @@ export default {
             if (this.selectedCategory === '전체') {
                 return this.boards;
             }
-            return this.boards.filter((board) => board.category === this.selectedCategory);
+            const categoryMap = {
+                AI: 'AI',
+                기획: 'Planning',
+                '웹 개발': 'WEB_DEV',
+            };
+            return this.boards.filter((board) => board.pf_type === categoryMap[this.selectedCategory]);
+        },
+        formattedTasks() {
+            return this.formatList(this.selectedBoard.desc_tasks);
+        },
+        formattedResults() {
+            return this.formatList(this.selectedBoard.desc_results);
         },
     },
     methods: {
         async fetchBoards() {
             try {
-                const response = await axios.get('/api/portfolios/');
-                this.boards = response.data;
+                const response = await api.get('portfolios/');
+                if (response.data && Array.isArray(response.data)) {
+                    this.boards = response.data;
+                } else {
+                    console.error('Unexpected data format:', response.data);
+                }
             } catch (error) {
                 console.error('Error fetching portfolio boards:', error);
             }
         },
+        async checkAdminStatus() {
+            try {
+                this.isAdmin = await api.checkAdmin();
+                console.log('Is admin:', this.isAdmin);
+            } catch (error) {
+                console.error('Admin check failed:', error);
+                this.isAdmin = false;
+            }
+        },
         formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('ko-KR');
+            return dateString ? new Date(dateString).toLocaleDateString('ko-KR') : '';
         },
         openModal(board) {
             this.selectedBoard = board;
         },
         closeModal() {
             this.selectedBoard = null;
-        },
-        async checkAdminStatus() {
-            try {
-                const response = await axios.get('/api/check-admin/');
-                this.isAdmin = response.data.isAdmin;
-            } catch (error) {
-                console.error('Admin check failed:', error);
-            }
         },
         closeAddForm() {
             this.showAddForm = false;
@@ -131,24 +186,47 @@ export default {
             this.formData = {
                 board_title: '',
                 board_semidesc: '',
-                board_desc: '',
+                desc_role: '',
+                desc_info: '',
+                desc_tasks: '',
+                desc_results: '',
                 pf_link: '',
-                pf_date: '',
+                pf_start_date: '',
+                pf_end_date: '',
                 order_num: null,
-                category: '기획',
+                pf_type: this.portfolioTypes[0].value,
             };
+        },
+        getProjectTypeLabel(type) {
+            const typeMap = {
+                AI: 'AI',
+                Planning: '기획',
+                WEB_DEV: '웹 개발',
+            };
+            return typeMap[type] || type;
         },
         async submitForm() {
             try {
+                console.log('Submitting form data:', this.formData); // 디버깅용
+                let response;
                 if (this.editingBoard) {
-                    await axios.put(`/api/portfolios/${this.editingBoard.id}/`, this.formData);
+                    response = await api.put(`portfolios/${this.editingBoard.id}/`, this.formData);
                 } else {
-                    await axios.post('/api/portfolios/', this.formData);
+                    response = await api.post('portfolios/', this.formData);
                 }
-                this.fetchBoards();
+                console.log('Server response:', response.data); // 디버깅용
+                await this.fetchBoards();
                 this.closeAddForm();
+                alert(this.editingBoard ? '포트폴리오가 수정되었습니다.' : '새 포트폴리오가 추가되었습니다.');
             } catch (error) {
                 console.error('Form submission error:', error);
+                if (error.response) {
+                    console.error('Error data:', error.response.data);
+                    console.error('Error status:', error.response.status);
+                    alert(`오류 발생: ${error.response.data.message || '알 수 없는 오류가 발생했습니다.'}`);
+                } else {
+                    alert('서버와의 통신 중 오류가 발생했습니다.');
+                }
             }
         },
         editBoard(board) {
@@ -159,12 +237,21 @@ export default {
         async deleteBoard(boardId) {
             if (confirm('정말로 이 포트폴리오를 삭제하시겠습니까?')) {
                 try {
-                    await axios.delete(`/api/portfolios/${boardId}/`);
-                    this.fetchBoards();
+                    await api.delete(`portfolios/${boardId}/`);
+                    await this.fetchBoards();
                 } catch (error) {
                     console.error('Delete error:', error);
                 }
             }
+        },
+        // 결과나 작업 내역이 한 줄로 나오는 것 방지
+        formatList(text) {
+            if (!text) return '';
+            return text
+                .split('-')
+                .filter((item) => item.trim())
+                .map((item) => `<li>${item.trim()}</li>`)
+                .join('');
         },
     },
     mounted() {
@@ -173,6 +260,19 @@ export default {
     },
 };
 </script>
+
+<!-- v-html 디렉티브 스타일이 적용되지 않는 문제로 따로 설정 -->
+<style>
+.project-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.project-section li {
+    margin-bottom: 10px;
+    line-height: 1; /* 행 간격 크게 증가 */
+}
+</style>
 
 <style scoped>
 .portfolio-board {
@@ -269,7 +369,7 @@ export default {
 
 .modal {
     position: fixed;
-    z-index: 1;
+    z-index: 1200;
     left: 0;
     top: 0;
     width: 100%;
@@ -282,13 +382,22 @@ export default {
 }
 
 .modal-content {
-    background-color: #fefefe;
-    padding: 20px;
-    border-radius: 12px;
-    width: 80%;
-    max-width: 600px;
-    max-height: 80vh;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-title {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
 }
 
 .close {
@@ -327,6 +436,90 @@ form button {
     color: white;
     border: none;
     cursor: pointer;
+}
+
+.project-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.project-type,
+.project-period {
+    background-color: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 15px;
+    color: #555;
+}
+
+.project-section {
+    margin-bottom: 25px;
+}
+
+.project-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.project-section h3 {
+    font-size: 18px;
+    color: #3498db;
+    margin-bottom: 10px;
+    border-left: 3px solid #3498db;
+    padding-left: 10px;
+}
+
+.project-section p,
+.project-section div {
+    line-height: 1.6;
+    color: #444;
+}
+
+.project-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.project-link:hover {
+    background-color: #2980b9;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #333;
+}
+
+/* 스크롤바 스타일링 */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 @media (max-width: 768px) {

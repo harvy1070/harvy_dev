@@ -61,24 +61,34 @@ class QnA(models.Model):
         return self.question_title
 
 # Portfolio 게시판 모델 정의
+# migrate를 위해 우선적으로 null값을 넣어두고 추후 데이터를 추가시 null해제
 class PortfolioBoard(models.Model):
     pf_type_choice = [
         ('AI', 'AI'),
-        ('ENTERPRISE', '기획'),
+        ('Planning', '기획'),
         ('WEB_DEV', '웹 개발'),
     ]
     user = models.ForeignKey(UserInfo, on_delete=models.CASCADE, related_name='portfolios', null=True)
-    # user_name = models.CharField(max_length=20, verbose_name='유저이름')
-    board_title = models.TextField(verbose_name='글 제목')
-    board_semidesc = models.TextField(null=True, blank=True, verbose_name='글 요약 내용')
-    board_desc = models.TextField(blank=True, null=True, verbose_name='글 전체 내용')
-    pf_link = models.TextField(null=True, blank=True, verbose_name='프로젝트 링크')
-    pf_date = models.DateField(null=True, blank=True, verbose_name='프로젝트 일자')
+    board_title = models.CharField(max_length=200, verbose_name='프로젝트 제목', null=True)
+    board_semidesc = models.TextField(verbose_name='프로젝트 간단 설명', null=True)
+    desc_role = models.TextField(verbose_name='역할', null=True)
+    desc_info = models.TextField(verbose_name='프로젝트 소개', null=True)
+    desc_tasks = models.TextField(verbose_name='주요 작업 내역', null=True)
+    desc_results = models.TextField(verbose_name='결과', null=True)
+    pf_link = models.URLField(null=True, blank=True, verbose_name='프로젝트 링크')
+    pf_start_date = models.DateField(verbose_name='프로젝트 시작일', null=True)
+    pf_end_date = models.DateField(verbose_name='프로젝트 종료일', null=True, blank=True)  # 진행 중인 프로젝트를 위해 null 허용
     order_num = models.IntegerField(blank=True, null=True, verbose_name='표시 순서')
     pf_type = models.CharField(max_length=20, choices=pf_type_choice, verbose_name='포트폴리오 유형', default='AI')
 
     class Meta:
         db_table = 'portfolioboard'
+        
+    @property
+    def project_period(self):
+        if self.pf_end_date:
+            return f"{self.pf_start_date.strftime('%Y. %m. %d.')} ~ {self.pf_end_date.strftime('%Y. %m. %d.')}"
+        return f"{self.pf_start_date.strftime('%Y. %m. %d.')} ~ 진행 중"
 
     def __str__(self):
         return self.board_title

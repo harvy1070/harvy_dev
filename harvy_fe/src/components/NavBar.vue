@@ -4,7 +4,12 @@
             <div class="navbar-brand">
                 <router-link to="/" class="navbar-item">Developer Kwon</router-link>
             </div>
-            <div class="navbar-menu">
+            <div class="hamburger" @click="toggleMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="navbar-menu" :class="{ 'is-active': isMenuOpen }">
                 <router-link to="/" class="navbar-item" :class="{ 'is-active': $route.path === '/' }">Home</router-link>
                 <router-link to="/about" class="navbar-item" :class="{ 'is-active': $route.path === '/about' }"
                     >About</router-link
@@ -69,6 +74,12 @@ export default {
             router.push('/login');
         };
 
+        const isMenuOpen = ref(false);
+
+        const toggleMenu = () => {
+            isMenuOpen.value = !isMenuOpen.value;
+        };
+
         return {
             isLoggedIn,
             userName,
@@ -76,6 +87,8 @@ export default {
             isDropdownOpen,
             toggleDropdown,
             closeDropdown,
+            isMenuOpen,
+            toggleMenu,
         };
     },
 };
@@ -182,38 +195,65 @@ export default {
     background-color: #f5f5f5;
 }
 
+/* 모바일 때문에 햄버거 추가  */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+}
+
+.hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: #333;
+    transition: all 0.3s linear;
+}
+
 @media (max-width: 768px) {
     .navbar-content {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .hamburger {
+        display: flex;
     }
 
     .navbar-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: #ffffff;
         flex-direction: column;
         width: 100%;
-        margin-top: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-menu.is-active {
+        display: flex;
     }
 
     .navbar-item {
-        padding: 0.5rem 0;
+        padding: 1rem;
+        border-top: 1px solid #e0e0e0;
     }
 
-    .user-greeting {
+    .user-menu {
         width: 100%;
-        justify-content: flex-start;
     }
 
     .dropdown-menu {
         position: static;
         width: 100%;
-        margin-top: 0.5rem;
+        margin-top: 0;
         box-shadow: none;
-    }
-
-    .navbar-item.is-active {
-        border-bottom: none;
-        border-left: 2px solid #3498db;
-        padding-left: 0.5rem;
     }
 }
 </style>

@@ -1,10 +1,10 @@
 from rest_framework import viewsets, permissions, status, serializers
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .serializers import UserInfoSerializer
-
+import logging
 from .models import *
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
@@ -13,6 +13,14 @@ from django.db.models import Prefetch
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_admin(request):
+    # 토큰 확인 작업
+    print(f"User: {request.user}, Is superuser: {request.user.is_superuser}")
+    return Response({'isAdmin': request.user.is_superuser})
 
 class UserInfoViewSet(viewsets.ModelViewSet):
     queryset = UserInfo.objects.all()
@@ -108,12 +116,33 @@ class PortfolioBoardViewSet(viewsets.ModelViewSet):
     serializer_class = PortfolioBoardSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    # select_related를 사용하여 user 정보를 함께 가져와 쿼리 최적화
-    # IsAuthenticatedOrReadOnly를 사용하여 포트폴리오 조회는 모두 가능하지만, 수정은 인증된 사용자만 가능하도록 설정
+    def create(self, request, *args, **kwargs):
+        logger.info(f"Received data for portfolio creation: {request.data}")
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            logger.error(f"Serializer errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-    # 포트폴리오 생성 시 현재 인증된 사용자를 자동으로 연결
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if not serializer.is_valid():
+            logger.error(f"Serializer errors in update: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        serializer.save()
 
 class PortfolioFilesViewSet(viewsets.ModelViewSet):
     queryset = PortfolioFiles.objects.all().select_related('portfolio')
