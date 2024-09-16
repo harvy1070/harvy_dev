@@ -62,6 +62,11 @@ class QnA(models.Model):
 
 # Portfolio 게시판 모델 정의
 class PortfolioBoard(models.Model):
+    pf_type_choice = [
+        ('AI', 'AI'),
+        ('ENTERPRISE', '기획'),
+        ('WEB_DEV', '웹 개발'),
+    ]
     # user = models.ForeignKey(UserInfo, on_delete=models.CASCADE, related_name='portfolios')
     # user_name = models.CharField(max_length=20, verbose_name='유저이름')
     board_title = models.TextField(verbose_name='글 제목')
@@ -70,6 +75,7 @@ class PortfolioBoard(models.Model):
     pf_link = models.TextField(null=True, blank=True, verbose_name='프로젝트 링크')
     pf_date = models.DateField(null=True, blank=True, verbose_name='프로젝트 일자')
     order_num = models.IntegerField(blank=True, null=True, verbose_name='표시 순서')
+    pf_type = models.CharField(max_length=20, choices=pf_type_choice, verbose_name='포트폴리오 유형', default='AI')
 
     class Meta:
         db_table = 'portfolioboard'

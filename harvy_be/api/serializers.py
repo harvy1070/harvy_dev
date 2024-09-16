@@ -71,11 +71,11 @@ class QnASerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'question_title', 'question_desc', 'created_at', 'answer_title', 'answer_desc', 'answered_at']
         read_only_fields = ['id', 'created_at', 'answered_at']
 
-# Portfolio
+# Portfolio / 9. 16. type 추가(AI, 기획, 웹 개발)
 class PortfolioBoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = PortfolioBoard
-        fields = ['id', 'board_title', 'board_semidesc', 'board_desc', 'pf_link', 'pf_date', 'order_num'
+        fields = ['id', 'pf_type', 'board_title', 'board_semidesc', 'board_desc', 'pf_link', 'pf_date', 'order_num'
         ]
         read_only_fields = ['id']
 

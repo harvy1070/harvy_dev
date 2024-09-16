@@ -3,11 +3,11 @@
         <h2>로그인</h2>
         <form @submit.prevent="login">
             <div class="form-group">
-                <label for="user_id">사용자 ID:</label>
+                <label for="user_id">사용자 ID</label>
                 <input type="text" id="user_id" v-model="user_id" required />
             </div>
             <div class="form-group">
-                <label for="password">비밀번호:</label>
+                <label for="password">비밀번호</label>
                 <input type="password" id="password" v-model="password" required />
             </div>
             <button type="submit">로그인</button>

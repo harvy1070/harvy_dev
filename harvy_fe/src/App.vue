@@ -1,26 +1,26 @@
 <template>
-  <div id="app">
-    <NavBar />
-    <router-view></router-view>
-  </div>
+    <div id="app">
+        <NavBar />
+        <router-view></router-view>
+    </div>
 </template>
 
 <script>
-import NavBar from '@/components/NavBar.vue'
+import NavBar from '@/components/NavBar.vue';
 
 export default {
-  name: 'App',
-  components: {
-    NavBar
-  }
-}
+    name: 'App',
+    components: {
+        NavBar,
+    },
+};
 </script>
 
 <style>
-  #app {
+#app {
     font-family: 'NanumSquare', sans-serif !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #2c3e50;
-  }
+}
 </style>

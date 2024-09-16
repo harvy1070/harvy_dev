@@ -179,10 +179,11 @@ export default {
     max-width: 1200px;
     margin: 50px auto 0;
     padding: 20px;
-    /* font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; */
+    font-family: 'NanumSquare', sans-serif !important;
 }
 
 .category-tabs {
+    margin-top: 20px;
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
@@ -192,6 +193,7 @@ export default {
 }
 
 .category-tabs button {
+    font-size: 15px;
     background: none;
     border: none;
     padding: 10px 20px;
@@ -202,8 +204,10 @@ export default {
 }
 
 .category-tabs button.active {
-    background-color: #fee500;
-    font-weight: bold;
+    background-color: #3498db;
+    color: #f2f2f2;
+    /* font-weight: bold; */
+    font-size: 15px;
 }
 
 .board-grid {
