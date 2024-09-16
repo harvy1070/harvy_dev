@@ -99,7 +99,7 @@ export default {
     methods: {
         async fetchBoards() {
             try {
-                const response = await axios.get('/api/portfolioboard/');
+                const response = await axios.get('/api/portfolios/');
                 this.boards = response.data;
             } catch (error) {
                 console.error('Error fetching portfolio boards:', error);
@@ -141,9 +141,9 @@ export default {
         async submitForm() {
             try {
                 if (this.editingBoard) {
-                    await axios.put(`/api/portfolioboard/${this.editingBoard.id}/`, this.formData);
+                    await axios.put(`/api/portfolios/${this.editingBoard.id}/`, this.formData);
                 } else {
-                    await axios.post('/api/portfolioboard/', this.formData);
+                    await axios.post('/api/portfolios/', this.formData);
                 }
                 this.fetchBoards();
                 this.closeAddForm();
@@ -159,7 +159,7 @@ export default {
         async deleteBoard(boardId) {
             if (confirm('정말로 이 포트폴리오를 삭제하시겠습니까?')) {
                 try {
-                    await axios.delete(`/api/portfolioboard/${boardId}/`);
+                    await axios.delete(`/api/portfolios/${boardId}/`);
                     this.fetchBoards();
                 } catch (error) {
                     console.error('Delete error:', error);

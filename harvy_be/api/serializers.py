@@ -75,7 +75,7 @@ class QnASerializer(serializers.ModelSerializer):
 class PortfolioBoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = PortfolioBoard
-        fields = ['id', 'pf_type', 'board_title', 'board_semidesc', 'board_desc', 'pf_link', 'pf_date', 'order_num'
+        fields = ['id', 'user_id', 'pf_type', 'board_title', 'board_semidesc', 'board_desc', 'pf_link', 'pf_date', 'order_num'
         ]
         read_only_fields = ['id']
 

@@ -67,7 +67,7 @@ class PortfolioBoard(models.Model):
         ('ENTERPRISE', '기획'),
         ('WEB_DEV', '웹 개발'),
     ]
-    # user = models.ForeignKey(UserInfo, on_delete=models.CASCADE, related_name='portfolios')
+    user = models.ForeignKey(UserInfo, on_delete=models.CASCADE, related_name='portfolios', null=True)
     # user_name = models.CharField(max_length=20, verbose_name='유저이름')
     board_title = models.TextField(verbose_name='글 제목')
     board_semidesc = models.TextField(null=True, blank=True, verbose_name='글 요약 내용')
