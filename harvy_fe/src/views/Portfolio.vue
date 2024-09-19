@@ -12,7 +12,7 @@
         </div>
 
         <div class="board-grid">
-            <div v-for="board in filteredBoards" :key="board.id" class="board-card" @click="openModal(board)">
+            <div v-for="board in paginatedBoards" :key="board.id" class="board-card" @click="openModal(board)">
                 <div class="card-header">
                     <span class="category-tag">{{ board.pf_type }}</span>
                     <span class="options-menu" v-if="isAdmin" @click.stop>
@@ -22,8 +22,34 @@
                 </div>
                 <h3 class="board-title">{{ board.board_title }}</h3>
                 <p class="board-semidesc">{{ board.board_semidesc }}</p>
-                <p class="board-date">{{ formatDate(board.pf_start_date) }} ~ {{ formatDate(board.pf_end_date) }}</p>
+                <p class="board-date">{{ board.project_period }}</p>
             </div>
+        </div>
+
+        <!-- Pagination 추가 -->
+        <div class="pagination">
+            <button @click="goToFirstPage" :disabled="currentPage === 1" class="pagination-btn">&laquo;</button>
+            <button @click="prevPage" :disabled="currentPage === 1" class="pagination-btn">&lt;</button>
+            <button v-if="displayedPageNumbers[0] > 1" @click="goToPage(1)" class="pagination-btn">1</button>
+            <span v-if="displayedPageNumbers[0] > 2">...</span>
+            <button
+                v-for="pageNumber in displayedPageNumbers"
+                :key="pageNumber"
+                @click="goToPage(pageNumber)"
+                :class="['pagination-btn', { active: currentPage === pageNumber }]"
+            >
+                {{ pageNumber }}
+            </button>
+            <span v-if="displayedPageNumbers[displayedPageNumbers.length - 1] < totalPages - 1">...</span>
+            <button
+                v-if="displayedPageNumbers[displayedPageNumbers.length - 1] < totalPages"
+                @click="goToPage(totalPages)"
+                class="pagination-btn"
+            >
+                {{ totalPages }}
+            </button>
+            <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-btn">&gt;</button>
+            <button @click="goToLastPage" :disabled="currentPage === totalPages" class="pagination-btn">&raquo;</button>
         </div>
 
         <!-- Modal -->
@@ -37,7 +63,7 @@
                 </div>
                 <div class="project-section">
                     <h3>프로젝트 소개</h3>
-                    <p>{{ selectedBoard.desc_info }}</p>
+                    <ul v-html="formattedInfo"></ul>
                 </div>
                 <div class="project-section">
                     <h3>역할</h3>
@@ -125,25 +151,73 @@ export default {
                 pf_type: 'AI',
             },
             editingBoard: null,
+            currentPage: 1,
+            itemsPerPage: 6,
         };
     },
     computed: {
         filteredBoards() {
+            let boards;
             if (this.selectedCategory === '전체') {
-                return this.boards;
+                boards = this.boards;
+            } else {
+                const categoryMap = {
+                    AI: 'AI',
+                    기획: 'Planning',
+                    '웹 개발': 'WEB_DEV',
+                };
+                boards = this.boards.filter((board) => board.pf_type === categoryMap[this.selectedCategory]);
             }
-            const categoryMap = {
-                AI: 'AI',
-                기획: 'Planning',
-                '웹 개발': 'WEB_DEV',
-            };
-            return this.boards.filter((board) => board.pf_type === categoryMap[this.selectedCategory]);
+
+            // order_num을 기준으로 정렬
+            return boards.sort((a, b) => {
+                // order_num이 없는 경우 가장 뒤로 보내기
+                if (a.order_num === null) return 1;
+                if (b.order_num === null) return -1;
+                return b.order_num - a.order_num;
+            });
+        },
+        formattedInfo() {
+            return this.formatList(this.selectedBoard.desc_info);
         },
         formattedTasks() {
             return this.formatList(this.selectedBoard.desc_tasks);
         },
         formattedResults() {
             return this.formatList(this.selectedBoard.desc_results);
+        },
+        paginatedBoards() {
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            return this.filteredBoards.slice(start, end);
+        },
+        totalPages() {
+            return Math.ceil(this.filteredBoards.length / this.itemsPerPage);
+        },
+        displayedPageNumbers() {
+            const range = 2; // 현재 페이지 양쪽에 표시할 페이지 수
+            let start = Math.max(1, this.currentPage - range);
+            let end = Math.min(this.totalPages, this.currentPage + range);
+
+            if (start > 1) {
+                if (start > 2) {
+                    start++; // 1 ... 표시를 위한 공간
+                }
+            }
+            if (end < this.totalPages) {
+                if (end < this.totalPages - 1) {
+                    end--; // ... lastPage 표시를 위한 공간
+                }
+            }
+
+            let pages = [];
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+            return pages;
+        },
+        totalItems() {
+            return this.filteredBoards.length;
         },
     },
     methods: {
@@ -207,12 +281,28 @@ export default {
         },
         async submitForm() {
             try {
-                console.log('Submitting form data:', this.formData); // 디버깅용
+                const formData = { ...this.formData };
+                for (let key in formData) {
+                    if (formData[key] === '') {
+                        if (key === 'pf_end_date') {
+                            delete formData[key]; // pf_end_date가 비어있으면 필드 자체를 제거
+                        } else {
+                            formData[key] = null;
+                        }
+                    }
+                }
+                if (formData.pf_end_date) {
+                    formData.pf_end_date = new Date(formData.pf_end_date).toISOString().split('T')[0];
+                }
+                if (formData.pf_start_date) {
+                    formData.pf_start_date = new Date(formData.pf_start_date).toISOString().split('T')[0];
+                }
+                console.log('Submitting form data:', formData); // 디버깅용
                 let response;
                 if (this.editingBoard) {
-                    response = await api.put(`portfolios/${this.editingBoard.id}/`, this.formData);
+                    response = await api.put(`portfolios/${this.editingBoard.id}/`, formData);
                 } else {
-                    response = await api.post('portfolios/', this.formData);
+                    response = await api.post('portfolios/', formData);
                 }
                 console.log('Server response:', response.data); // 디버깅용
                 await this.fetchBoards();
@@ -223,7 +313,11 @@ export default {
                 if (error.response) {
                     console.error('Error data:', error.response.data);
                     console.error('Error status:', error.response.status);
-                    alert(`오류 발생: ${error.response.data.message || '알 수 없는 오류가 발생했습니다.'}`);
+                    let errorMessage = '알 수 없는 오류가 발생했습니다.';
+                    if (error.response.data.pf_end_date) {
+                        errorMessage = `종료일 오류: ${error.response.data.pf_end_date[0]}`;
+                    }
+                    alert(`오류 발생: ${errorMessage}`);
                 } else {
                     alert('서버와의 통신 중 오류가 발생했습니다.');
                 }
@@ -252,6 +346,31 @@ export default {
                 .filter((item) => item.trim())
                 .map((item) => `<li>${item.trim()}</li>`)
                 .join('');
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        },
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+            }
+        },
+        goToPage(page) {
+            this.currentPage = page;
+        },
+        goToFirstPage() {
+            this.currentPage = 1;
+        },
+        goToLastPage() {
+            this.currentPage = this.totalPages;
+        },
+    },
+    // 보고 있는 화면을 초기화
+    watch: {
+        selectedCategory() {
+            this.currentPage = 1;
         },
     },
     mounted() {
@@ -520,6 +639,45 @@ form button {
 
 .modal-content::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    font-family: 'Arial', sans-serif;
+}
+
+.pagination-btn {
+    background-color: #ffffff;
+    color: #333333;
+    border: 1px solid #dddddd;
+    width: 32px;
+    height: 32px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.pagination-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-btn:disabled {
+    color: #cccccc;
+    cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

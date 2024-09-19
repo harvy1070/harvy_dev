@@ -92,11 +92,12 @@ class PortfolioBoardSerializer(serializers.ModelSerializer):
             'order_num',       # 표시 순서
             'project_period',  # 시작 + 종료일
         ]
-        read_only_fields = ['id', 'user', 'project_period']  # id 및 user 필드는 읽기 전용으로 설정.
+        read_only_fields = ['id', 'user', 'project_period']
 
     def validate(self, data):
-        if data.get('pf_end_date') and data['pf_start_date'] > data['pf_end_date']:
-            raise serializers.ValidationError("종료일은 시작일보다 늦어야 합니다.")
+        if 'pf_start_date' in data and 'pf_end_date' in data:
+            if data['pf_end_date'] and data['pf_start_date'] > data['pf_end_date']:
+                raise serializers.ValidationError("종료일은 시작일보다 늦어야 합니다.")
         return data
 
     def get_project_period(self, obj):

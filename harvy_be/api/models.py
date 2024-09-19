@@ -86,9 +86,13 @@ class PortfolioBoard(models.Model):
         
     @property
     def project_period(self):
+        if not self.pf_start_date:
+            return "날짜 미정"
+        start = self.pf_start_date.strftime('%Y. %m. %d.')
         if self.pf_end_date:
-            return f"{self.pf_start_date.strftime('%Y. %m. %d.')} ~ {self.pf_end_date.strftime('%Y. %m. %d.')}"
-        return f"{self.pf_start_date.strftime('%Y. %m. %d.')} ~ 진행 중"
+            end = self.pf_end_date.strftime('%Y. %m. %d.')
+            return f"{start} ~ {end}"
+        return f"{start} ~ 진행 중"
 
     def __str__(self):
         return self.board_title
