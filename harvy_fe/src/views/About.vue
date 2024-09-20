@@ -209,6 +209,7 @@ export default {
                         { name: 'Pandas/Numpy', level: 70 },
                         { name: 'TensorFlow/Pytorch', level: 65 },
                         { name: 'Matplotlib/Seaborn', level: 75 },
+                        { name: 'SQL', level: 55 },
                     ],
                 },
                 {
