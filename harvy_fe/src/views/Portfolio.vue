@@ -646,7 +646,7 @@ form button {
     justify-content: center;
     align-items: center;
     margin-top: 30px;
-    font-family: 'Arial', sans-serif;
+    /* font-family: 'Arial', sans-serif; */
 }
 
 .pagination-btn {
