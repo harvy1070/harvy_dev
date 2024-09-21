@@ -43,10 +43,19 @@
 
         <div v-if="selectedMainTab === '자격증'" class="certifications">
             <h3><i class="fas fa-certificate"></i> 보유 자격증</h3>
-            <div class="grid">
+            <div class="grid cert-grid">
                 <div class="cert-item" v-for="cert in certifications" :key="cert.name">
                     <h4>{{ cert.name }}</h4>
                     <p>{{ cert.date }}</p>
+                    <p>{{ cert.org }}</p>
+                </div>
+            </div>
+
+            <h3><i class="fas fa-hourglass-half"></i> 취득 준비중인 자격증</h3>
+            <div class="grid cert-grid">
+                <div class="cert-item" v-for="cert in preparingCertifications" :key="cert.name">
+                    <h4>{{ cert.name }}</h4>
+                    <p>예정일: {{ cert.expectedDate }}</p>
                     <p>{{ cert.org }}</p>
                 </div>
             </div>
@@ -56,13 +65,15 @@
             <h3><i class="fas fa-briefcase"></i> 회사 경력</h3>
             <div class="timeline">
                 <div class="experience-item" v-for="exp in experiences" :key="exp.company">
-                    <div class="date">{{ exp.period }}</div>
-                    <div class="content">
+                    <div class="timeline-date">
+                        <span class="date-circle"></span>
+                        {{ exp.period }}
+                    </div>
+                    <div class="timeline-content">
                         <div class="company-position">
-                            <h4 :style="{ color: 'black', display: 'inline' }">{{ exp.company }}</h4>
-                            <p class="position" :style="{ display: 'inline', marginLeft: '10px' }">
-                                {{ exp.position }}
-                            </p>
+                            <h4 class="company-name">
+                                {{ exp.company }}<span class="position">{{ exp.position }}</span>
+                            </h4>
                         </div>
                         <div class="company-desc">
                             <p>{{ exp.description }}</p>
@@ -165,6 +176,23 @@ export default {
                     name: '전산회계 1급',
                     date: '2011. 07. 11.',
                     org: '한국세무사회',
+                },
+            ],
+            preparingCertifications: [
+                {
+                    name: '빅데이터분석기사',
+                    expectedDate: '2025. 03.',
+                    org: '한국데이터산업진흥원',
+                },
+                {
+                    name: 'TEPS 327점 이상',
+                    expectedDate: '2025. 01. ~',
+                    org: '서울대학교 언어교육원',
+                },
+                {
+                    name: 'OPIc IM 이상 등급',
+                    expectedDate: '~ 2024. 12.',
+                    org: 'ACTFL',
                 },
             ],
             experiences: [
@@ -282,17 +310,18 @@ export default {
 
 html,
 body {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    display: none;
 }
 </style>
 
 <style scoped>
+/* 레이아웃 */
 .about-page {
     max-width: 800px;
     margin: 0 auto;
@@ -301,21 +330,17 @@ body::-webkit-scrollbar {
 }
 
 .header {
-    /* position: sticky; */
     margin-top: 50px;
     text-align: center;
     margin-bottom: 2rem;
 }
 
+/* 타이포그래피 */
 h1,
 h2,
 h3,
 h4 {
     color: #2c3e50;
-}
-
-h4 {
-    color: #3498db;
 }
 
 h1 {
@@ -329,6 +354,12 @@ h3 {
     border-bottom: 2px solid #3498db;
     padding-bottom: 0.5rem;
 }
+
+h4 {
+    color: #3498db;
+}
+
+/* 명함 스타일 */
 .business-card {
     width: 100%;
     height: 200px;
@@ -360,15 +391,16 @@ h3 {
 }
 
 .name {
-    font-size: 1.5rem;
+    margin-top: -3px;
+    font-size: 1.4rem;
     color: #2c3e50;
     margin-bottom: 0.25rem;
 }
 
 .title {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #7f8c8d;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .card-right p {
@@ -384,51 +416,10 @@ h3 {
     width: 15px;
 }
 
-.name {
-    margin-top: -3px;
-    font-size: 1.4rem;
-    color: #2c3e50;
-}
-
-.title {
-    font-size: 1rem;
-    color: #7f8c8d;
-    margin-bottom: 1rem;
-}
-
-.contact-info p {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    color: #34495e;
-}
-
-.contact-info i {
-    margin-right: 0.5rem;
-    color: #3498db;
-    width: 20px;
-}
-
-@media (max-width: 768px) {
-    .business-card {
-        flex-direction: column;
-    }
-
-    .card-left {
-        max-width: 100%;
-        height: 200px;
-    }
-
-    .card-right {
-        padding: 1rem;
-    }
-}
-
+/* 학력 정보 스타일 */
 .education-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    /* gap: 1.5rem; */
-    /* margin-top: 1.5rem; */
 }
 
 .education-item {
@@ -482,6 +473,7 @@ h3 {
     font-weight: 600;
 }
 
+/* 탭 스타일 */
 .main-tabs,
 .skill-tabs {
     display: flex;
@@ -493,10 +485,6 @@ h3 {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.company-position {
-    margin-top: 20px;
-}
-
 .main-tabs button,
 .skill-tabs button {
     padding: 0.75rem 1.5rem;
@@ -506,9 +494,7 @@ h3 {
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
-
-    /* 글씨 관련 스타일 수정 */
-    font-size: 1rem; /* 글씨 크기 */
+    font-size: 1rem;
     font-family: 'NanumSquare', sans-serif !important;
     font-weight: 600;
     color: #555;
@@ -521,6 +507,7 @@ h3 {
     box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
 }
 
+/* 그리드 레이아웃 */
 .grid,
 .skill-grid {
     display: grid;
@@ -528,11 +515,11 @@ h3 {
     gap: 1rem;
 }
 
-.grid {
-    /* margin-top: -20px; */
+/* 자격증 아이템 스타일 */
+.cert-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 .cert-item {
@@ -554,7 +541,7 @@ h3 {
     font-size: 1rem;
     margin-bottom: 0.5rem;
     letter-spacing: 0.5px;
-    /* border-bottom: 2px solid #e0e0e0; */
+    border-bottom: 2px solid #e0e0e0;
     padding-bottom: 0.3rem;
 }
 
@@ -575,60 +562,92 @@ h3 {
     font-weight: 600;
 }
 
-.cert-item,
-.skill-item {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* 경력 타임라인 스타일 */
+.work-experience {
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .timeline {
     position: relative;
+    padding: 20px 0;
 }
 
 .timeline::before {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
+    bottom: 0;
+    left: 20px;
     width: 2px;
-    height: 100%;
-    background-color: #3498db;
+    background: #e0e0e0;
 }
 
 .experience-item {
     position: relative;
-    margin-bottom: 1.5rem;
-    padding-left: 2rem;
+    margin-bottom: 40px;
+    padding-left: 50px;
 }
 
-.experience-item::before {
-    content: '';
-    position: absolute;
-    left: -6px;
-    top: 0;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background-color: #3498db;
-}
-
-.date {
-    font-weight: bold;
+.timeline-date {
+    font-weight: 600;
+    margin-bottom: 10px;
     color: #3498db;
-    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.date-circle {
+    position: absolute;
+    left: -35px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: #3498db;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.timeline-content {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* company-name과 position을 인라인으로 표시하기 위한 새로운 스타일 */
+.company-position {
+    margin-bottom: 10px;
+}
+
+.company-name {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.2rem;
+    display: inline-block;
 }
 
 .position {
-    font-size: 0.8rem;
-    color: #7f8c8d;
-}
-
-.company-desc {
+    margin-left: 10px;
+    font-weight: 600;
+    color: #3498db;
     font-size: 0.9rem;
 }
 
+.company-desc p {
+    color: #34495e;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+/* 기술 스택 스타일 */
 .skill-content {
     background-color: #ffffff;
     padding: 2rem;
@@ -669,16 +688,43 @@ h3 {
     transition: width 0.5s ease-out;
 }
 
+/* 반응형 스타일 */
 @media (max-width: 768px) {
+    .company-name {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .position {
+        margin-left: 0;
+        display: block;
+    }
+
     .about-page {
         padding: 1rem;
     }
+
+    .business-card {
+        flex-direction: column;
+    }
+
+    .card-left {
+        max-width: 100%;
+        height: 200px;
+    }
+
+    .card-right {
+        padding: 1rem;
+    }
+
     .info-grid {
         grid-template-columns: 1fr;
     }
+
     .info-item {
         flex-basis: 100%;
     }
+
     .grid,
     .skill-grid {
         grid-template-columns: 1fr;
@@ -694,8 +740,33 @@ h3 {
     .skill-tabs button {
         flex: 1 1 calc(50% - 0.5rem);
         margin: 0.25rem;
-        font-size: 0.9rem; /* 모바일에서는 글씨 크기를 조금 줄임 */
-        padding: 0.6rem 1rem; /* 패딩도 조절 */
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .timeline::before {
+        left: 15px;
+    }
+
+    .experience-item {
+        padding-left: 35px;
+    }
+
+    .timeline-date {
+        margin-left: 10px;
+    }
+
+    .date-circle {
+        left: -35.5px;
+        top: 5px;
+        transform: none;
+    }
+
+    .timeline-content {
+        margin-left: 10px;
+    }
+    .cert-grid {
+        grid-template-columns: 1fr;
     }
 }
 </style>

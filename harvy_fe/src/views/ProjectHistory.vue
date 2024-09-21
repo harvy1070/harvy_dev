@@ -187,7 +187,7 @@ export default {
     }
 
     .date-circle {
-        left: -25px;
+        left: -30px;
     }
 }
 
