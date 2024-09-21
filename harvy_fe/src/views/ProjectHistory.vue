@@ -1,8 +1,8 @@
 <template>
     <div class="project-history">
-        <h2>참여한 프로젝트 소개</h2>
-        <div v-if="loading">로딩 중...</div>
-        <div v-else-if="error">{{ error }}</div>
+        <h2 class="section-title"><i class="fas fa-project-diagram"></i> 참여 프로젝트</h2>
+        <div v-if="loading" class="loading">로딩 중...</div>
+        <div v-else-if="error" class="error">{{ error }}</div>
         <div v-else class="timeline">
             <div v-for="item in timeline" :key="item.id" class="timeline-item">
                 <div class="timeline-date">
@@ -10,13 +10,14 @@
                     {{ formatDate(item.date) }}
                 </div>
                 <div class="timeline-content">
-                    <h3>{{ item.title }}</h3>
-                    <div class="timeline-company-role-order" v-if="item.company || item.role || item.order_company">
-                        {{ item.company }}{{ item.company && item.role ? ' (' + item.role + ')' : item.role }}
-                        {{ (item.company || item.role) && item.order_company ? ' / ' : '' }}
-                        {{ item.order_company }}
+                    <h3 class="project-title">
+                        {{ item.title }}
+                        <span v-if="item.order_company" class="order-company">{{ item.order_company }}</span>
+                    </h3>
+                    <div class="company-role" v-if="item.company || item.role">
+                        {{ item.company }}{{ item.company && item.role ? ' / ' + item.role : item.role }}
                     </div>
-                    <p>{{ item.description }}</p>
+                    <p class="project-description">{{ item.description }}</p>
                     <div class="timeline-type">{{ item.type }}</div>
                 </div>
             </div>
@@ -59,13 +60,32 @@ export default {
 };
 </script>
 
+<style>
+.project-history {
+    font-family: 'NanumSquare', sans-serif !important;
+}
+</style>
+
 <style scoped>
 .project-history {
-    margin-top: 50px !important;
     max-width: 800px;
-    margin: 0 auto;
+    margin: 50px auto 0;
     padding: 20px;
-    /* align-items: center; */
+    font-family: 'Arial', sans-serif;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    color: #3498db;
+    margin-bottom: 30px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    margin-right: 10px;
+    color: #3498db;
 }
 
 .timeline {
@@ -80,17 +100,17 @@ export default {
     bottom: 0;
     left: 20px;
     width: 2px;
-    background: #3498db;
+    background: #e0e0e0;
 }
 
 .timeline-item {
     position: relative;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     padding-left: 50px;
 }
 
 .timeline-date {
-    font-weight: bold;
+    font-weight: 600;
     margin-bottom: 10px;
     color: #3498db;
     position: relative;
@@ -98,44 +118,63 @@ export default {
 
 .date-circle {
     position: absolute;
-    left: -40px;
+    left: -35px;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
+    width: 12px;
+    height: 12px;
     background-color: #3498db;
     border-radius: 50%;
     z-index: 1;
 }
 
 .timeline-content {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
-.timeline-content h3 {
+.timeline-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.project-title {
     margin-top: 0;
     color: #2c3e50;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-company {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    font-weight: normal;
+}
+
+.company-role {
+    font-weight: 600;
+    color: #3498db;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.project-description {
+    color: #34495e;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin-bottom: -10px;
 }
 
 .timeline-type {
     margin-top: 10px;
-    font-style: italic;
+    /* font-style: italic; */
     color: #7f8c8d;
-}
-
-.timeline-company-role {
-    font-weight: bold;
-    color: #34495e;
-    margin-bottom: 10px;
-}
-
-.timeline-company-role-order {
-    font-weight: bold;
-    color: #3d8eff;
-    margin-bottom: 10px;
+    font-size: 0.85rem;
 }
 
 @media (max-width: 768px) {
@@ -144,13 +183,19 @@ export default {
     }
 
     .timeline-item {
-        padding-left: 30px;
+        padding-left: 35px;
     }
 
     .date-circle {
-        left: -30px;
-        width: 16px;
-        height: 16px;
+        left: -25px;
     }
+}
+
+.loading,
+.error {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.1rem;
+    color: #7f8c8d;
 }
 </style>

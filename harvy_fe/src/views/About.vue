@@ -34,9 +34,8 @@
             <div class="education-list">
                 <div v-for="edu in basicInfo.education" :key="edu.school" class="education-item">
                     <h4>{{ edu.school }}</h4>
-                    <p>{{ edu.degree }}</p>
-                    <p>{{ edu.period }}</p>
                     <p>{{ edu.major }}</p>
+                    <p>{{ edu.period }}</p>
                     <p>{{ edu.status }}</p>
                 </div>
             </div>
@@ -59,9 +58,15 @@
                 <div class="experience-item" v-for="exp in experiences" :key="exp.company">
                     <div class="date">{{ exp.period }}</div>
                     <div class="content">
-                        <h4 :style="{ color: 'black' }">{{ exp.company }}</h4>
-                        <p class="position">{{ exp.position }}</p>
-                        <p>{{ exp.description }}</p>
+                        <div class="company-position">
+                            <h4 :style="{ color: 'black', display: 'inline' }">{{ exp.company }}</h4>
+                            <p class="position" :style="{ display: 'inline', marginLeft: '10px' }">
+                                {{ exp.position }}
+                            </p>
+                        </div>
+                        <div class="company-desc">
+                            <p>{{ exp.description }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -115,7 +120,7 @@ export default {
                         status: '졸업',
                     },
                     {
-                        school: '경기공업대학교(현 과학기술대)',
+                        school: '경기공업대학교(과학기술대)',
                         degree: '전문대학',
                         period: '2010. 03. - 2011. 03.',
                         major: 'E비즈니스과',
@@ -293,7 +298,6 @@ body::-webkit-scrollbar {
     margin: 0 auto;
     padding: 2rem;
     color: #333;
-    font-family: inherit;
 }
 
 .header {
@@ -362,13 +366,13 @@ h3 {
 }
 
 .title {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     color: #7f8c8d;
     margin-bottom: 0.5rem;
 }
 
 .card-right p {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     margin-bottom: 0.25rem;
     display: flex;
     align-items: center;
@@ -381,10 +385,9 @@ h3 {
 }
 
 .name {
-    margin-top: 2px;
-    font-size: 1.8rem;
+    margin-top: -3px;
+    font-size: 1.4rem;
     color: #2c3e50;
-    /* margin-bottom: 0.5rem; */
 }
 
 .title {
@@ -423,25 +426,60 @@ h3 {
 
 .education-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    /* gap: 1.5rem; */
+    /* margin-top: 1.5rem; */
 }
 
 .education-item {
-    background-color: #f8f9fa;
+    background-color: #ffffff;
     padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.education-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 .education-item h4 {
+    margin-top: 10px;
     color: #3498db;
-    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 0.5rem;
 }
 
 .education-item p {
-    margin: 0.25rem 0;
+    margin: 0.05rem 0;
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.education-item p:nth-child(2) {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.education-item p:nth-child(3) {
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.education-item p:nth-child(4) {
+    color: #0ba6b1;
+    font-size: 0.9rem;
+}
+
+.education-item p:last-child {
+    margin-top: 0.1rem;
+    color: #3498db;
+    font-weight: 600;
 }
 
 .main-tabs,
@@ -455,6 +493,10 @@ h3 {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.company-position {
+    margin-top: 20px;
+}
+
 .main-tabs button,
 .skill-tabs button {
     padding: 0.75rem 1.5rem;
@@ -464,14 +506,11 @@ h3 {
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-weight: 500;
-    color: #555;
 
     /* 글씨 관련 스타일 수정 */
     font-size: 1rem; /* 글씨 크기 */
-    font-weight: 600; /* 글씨 굵기 */
-    letter-spacing: 0.5px; /* 자간 */
-    text-transform: uppercase; /* 대문자로 변경 */
+    font-family: 'NanumSquare', sans-serif !important;
+    font-weight: 600;
     color: #555;
 }
 
@@ -487,6 +526,53 @@ h3 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
+}
+
+.grid {
+    /* margin-top: -20px; */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.cert-item {
+    background-color: #ffffff;
+    padding: 0.5rem 1rem 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.cert-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cert-item h4 {
+    margin-top: 5px;
+    color: #3498db;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+    /* border-bottom: 2px solid #e0e0e0; */
+    padding-bottom: 0.3rem;
+}
+
+.cert-item p {
+    margin: 0.25rem 0;
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.cert-item p:first-of-type {
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.cert-item p:last-child {
+    color: #2c3e50;
+    font-weight: 600;
 }
 
 .cert-item,
@@ -535,7 +621,12 @@ h3 {
 }
 
 .position {
+    font-size: 0.8rem;
     color: #7f8c8d;
+}
+
+.company-desc {
+    font-size: 0.9rem;
 }
 
 .skill-content {
