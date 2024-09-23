@@ -5,7 +5,7 @@ from .settings import *
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'harvy-dev-8903972a7699.herokuapp.com,localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'harvy-dev-f064f0b3b0ee.herokuapp.com,localhost,127.0.0.1').split(',')
 
 DATABASES = {
     'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
