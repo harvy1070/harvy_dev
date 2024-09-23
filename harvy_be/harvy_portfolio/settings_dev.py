@@ -21,6 +21,14 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
+    },
+    'heroku_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('HEROKU_DB_NAME'),
+        'USER': os.getenv('HEROKU_DB_USER'),
+        'PASSWORD': os.getenv('HEROKU_DB_PASSWORD'),
+        'HOST': os.getenv('HEROKU_DB_HOST'),
+        'PORT': os.getenv('HEROKU_DB_PORT'),
     }
 }
 

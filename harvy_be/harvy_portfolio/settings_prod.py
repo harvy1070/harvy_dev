@@ -7,9 +7,29 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'harvy-dev-f064f0b3b0ee.herokuapp.com,localhost,127.0.0.1').split(',')
 
+# heroku, db 연동용으로 수정
 DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+    },
+    'heroku_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('HEROKU_DB_NAME'),
+        'USER': os.getenv('HEROKU_DB_USER'),
+        'PASSWORD': os.getenv('HEROKU_DB_PASSWORD'),
+        'HOST': os.getenv('HEROKU_DB_HOST'),
+        'PORT': os.getenv('HEROKU_DB_PORT'),
+    }
 }
+
+# DATABASES = {
+#     'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+# }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'

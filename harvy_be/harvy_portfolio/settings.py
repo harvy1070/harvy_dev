@@ -105,4 +105,6 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# db_sync를 위한 router 추가
+DATABASE_ROUTERS = ['api.db_router.DatabaseRouter']
 AUTH_USER_MODEL = 'api.UserInfo'
