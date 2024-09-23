@@ -1,6 +1,7 @@
 from .settings import *
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# 개발환경 SECRET_KEY
 SECRET_KEY = 'django-insecure-733=d8zn2nu=b566a&28ip3iviw39=(x8k#7%69qks_heqlpq3'
 DEBUG = True
 
