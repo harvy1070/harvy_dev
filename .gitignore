@@ -16,3 +16,10 @@ db.sqlite3-journal
 # 버전 관리
 # .env.development
 # .env.production
+
+# heroku
+*.pyc
+__pycache__
+db.sqlite3
+.env
+*.log
