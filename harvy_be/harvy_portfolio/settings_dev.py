@@ -1,8 +1,14 @@
+import os
 from .settings import *
+from dotenv import load_dotenv
+
+# .env 파일에서 환경 변수 로드
+load_dotenv()
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-# 개발환경 SECRET_KEY
-SECRET_KEY = 'django-insecure-733=d8zn2nu=b566a&28ip3iviw39=(x8k#7%69qks_heqlpq3'
+
+# 환경 변수에서 SECRET_KEY 가져오기
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = True
 
 # Database
@@ -10,11 +16,11 @@ DEBUG = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydb',
-        'USER': 'postgres',
-        'PASSWORD': 'tmdghl12#$',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
