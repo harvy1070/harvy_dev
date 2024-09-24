@@ -9,23 +9,29 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'harvy-dev-f064f0b3b0ee.herokuap
 
 # heroku, db 연동용으로 수정
 DATABASES = {
-    'default': {
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=True),
+    'local_db': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
-    },
-    'heroku_db': {
+    }
+}
+
+# Heroku DATABASE_URL이 설정되어 있지 않은 경우를 위한 폴백
+if 'DATABASE_URL' not in os.environ:
+    DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('HEROKU_DB_NAME'),
         'USER': os.getenv('HEROKU_DB_USER'),
         'PASSWORD': os.getenv('HEROKU_DB_PASSWORD'),
         'HOST': os.getenv('HEROKU_DB_HOST'),
         'PORT': os.getenv('HEROKU_DB_PORT'),
-    }
 }
+    
+DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
 # DATABASES = {
 #     'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
@@ -36,8 +42,8 @@ STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = []
 
-
-MIDDLEWARE = ['whitenoise.middleware.WhiteNoiseMiddleware'] + MIDDLEWARE
+if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
+    MIDDLEWARE = ['whitenoise.middleware.WhiteNoiseMiddleware'] + MIDDLEWARE
 
 CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
 CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'https://harvy13.netlify.app').split(',')
@@ -63,5 +69,16 @@ LOGGING = {
     'root': {
         'handlers': ['console'],
         'level': 'WARNING',
+    },
+}
+
+# Heroku 환경을 위한 RQ 설정 오버라이드
+RQ_QUEUES = {
+    'default': {
+        'HOST': os.getenv('REDIS_HOST', 'localhost'),
+        'PORT': int(os.getenv('REDIS_PORT', 6379)),
+        'DB': 0,
+        'PASSWORD': os.getenv('REDIS_PASSWORD', ''),
+        'DEFAULT_TIMEOUT': 360,
     },
 }
