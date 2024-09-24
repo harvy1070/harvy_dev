@@ -116,10 +116,11 @@ export default {
             }
             try {
                 const { success, message, data } = await store.dispatch('auth/signup', formData.value);
-                console.log('Signup response:', { success, message, data }); // 응답 로깅
+                console.log('Signup response:', { success, message, data });
                 if (success) {
-                    alert(message);
-                    router.push('/login');
+                    alert('회원가입에 성공했습니다!');
+                    // 홈 페이지로 리디렉션 (로그인은 이미 auth.js에서 처리됨)
+                    router.push('/');
                 } else {
                     alert(message);
                 }

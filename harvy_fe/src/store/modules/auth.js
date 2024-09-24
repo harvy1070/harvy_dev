@@ -36,7 +36,7 @@ export default {
                 };
             }
         },
-        async signup({ commit }, formData) {
+        async signup({ commit, dispatch }, formData) {
             try {
                 console.log('Sending signup data:', formData);
                 const response = await api.signup(formData);
@@ -49,6 +49,13 @@ export default {
                     if (response.access) {
                         commit('SET_TOKEN', response.access);
                     }
+
+                    // 회원가입 성공 후 자동 로그인
+                    await dispatch('login', {
+                        user_id: formData.user_id,
+                        password: formData.password1,
+                    });
+
                     return { success: true, message: '회원가입 성공' };
                 } else {
                     throw new Error(response.message || '회원가입에 실패했습니다.');
