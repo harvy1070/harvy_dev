@@ -98,6 +98,20 @@ class AuthViewSet(viewsets.ViewSet):
     def user(self, request):
         serializer = UserInfoSerializer(request.user)
         return Response(serializer.data)
+    
+    # 회원가입 view 추가 / 9. 24.
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def signup(self, request):
+        serializer = UserInfoCreationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class QnAViewSet(viewsets.ModelViewSet):
     queryset = QnA.objects.all().select_related('user')
