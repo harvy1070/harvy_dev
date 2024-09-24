@@ -39,7 +39,7 @@ export default {
         async signup({ commit }, formData) {
             try {
                 // api 객체의 baseURL 설정을 확인하고, 필요하다면 전체 URL을 사용
-                const response = await api.post('/api/signup/', formData);
+                const response = await api.signup(formData);
 
                 if (response.data.success) {
                     commit('SET_USER', response.data.user);
