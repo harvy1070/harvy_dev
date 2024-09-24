@@ -38,16 +38,42 @@ export default {
         },
         async signup({ commit }, formData) {
             try {
-                const response = await api.post('/signup', formData); // 회원가입 API 호출
-                commit('SET_USER', response.data.user); // 사용자 정보를 상태에 저장
-                commit('SET_TOKEN', response.data.access); // 토큰을 상태에 저장
-                return { success: true, message: '회원가입 성공' }; // 성공 메시지 반환
+                // api 객체의 baseURL 설정을 확인하고, 필요하다면 전체 URL을 사용
+                const response = await api.post('/api/signup/', formData);
+
+                if (response.data.success) {
+                    commit('SET_USER', response.data.user);
+                    commit('SET_TOKEN', response.data.access);
+                    return { success: true, message: '회원가입 성공' };
+                } else {
+                    throw new Error(response.data.message || '회원가입에 실패했습니다.');
+                }
             } catch (error) {
-                console.error('Signup error:', error.response?.data || error.message);
-                return {
-                    success: false,
-                    message: error.response?.data?.error || '회원가입에 실패했습니다.',
-                };
+                console.error('Signup error:', error);
+
+                if (error.response) {
+                    // 서버에서 응답은 왔지만 상태 코드가 2xx가 아닌 경우
+                    console.error('Server responded with:', error.response.status, error.response.data);
+                    return {
+                        success: false,
+                        message:
+                            error.response.data.detail || error.response.data.message || '회원가입에 실패했습니다.',
+                    };
+                } else if (error.request) {
+                    // 요청은 보냈지만 응답을 받지 못한 경우
+                    console.error('No response received:', error.request);
+                    return {
+                        success: false,
+                        message: '서버에 연결할 수 없습니다. 네트워크 연결을 확인해 주세요.',
+                    };
+                } else {
+                    // 요청 설정 중 오류가 발생한 경우
+                    console.error('Error setting up the request:', error.message);
+                    return {
+                        success: false,
+                        message: '요청 중 오류가 발생했습니다.',
+                    };
+                }
             }
         },
         logout({ commit }) {
