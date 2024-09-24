@@ -36,6 +36,20 @@ export default {
                 };
             }
         },
+        async signup({ commit }, formData) {
+            try {
+                const response = await api.post('/signup', formData); // 회원가입 API 호출
+                commit('SET_USER', response.data.user); // 사용자 정보를 상태에 저장
+                commit('SET_TOKEN', response.data.access); // 토큰을 상태에 저장
+                return { success: true, message: '회원가입 성공' }; // 성공 메시지 반환
+            } catch (error) {
+                console.error('Signup error:', error.response?.data || error.message);
+                return {
+                    success: false,
+                    message: error.response?.data?.error || '회원가입에 실패했습니다.',
+                };
+            }
+        },
         logout({ commit }) {
             commit('SET_USER', null);
             commit('SET_TOKEN', null);

@@ -55,6 +55,12 @@ api.login = async (credentials) => {
     return response.data;
 };
 
+// 회원가입 함수 추가
+api.signup = async (formData) => {
+    const response = await api.post('auth/signup/', formData); // 회원가입 API 호출
+    return response.data;
+};
+
 // 관리자 확인 함수
 api.checkAdmin = async () => {
     const response = await api.get('check-admin/');
