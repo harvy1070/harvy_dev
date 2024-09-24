@@ -42,3 +42,13 @@ CORS_ALLOWED_ORIGINS = [
 
 # Override SIMPLE_JWT settings if needed
 SIMPLE_JWT = {**SIMPLE_JWT, 'SIGNING_KEY': SECRET_KEY}
+
+# 개발 환경에서의 Redis 설정
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 360,
+    }
+}
