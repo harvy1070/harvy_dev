@@ -19,6 +19,8 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
+        console.log('Request URL:', config.url);
+        console.log('Full URL:', config.baseURL + config.url);
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
@@ -57,7 +59,7 @@ api.login = async (credentials) => {
 
 // 회원가입 함수 추가
 api.signup = async (formData) => {
-    const response = await api.post('auth/signup/', formData); // 회원가입 API 호출
+    const response = await api.post('signup/', formData); // 회원가입 API 호출
     return response.data;
 };
 
