@@ -1,10 +1,13 @@
 import axios from 'axios';
 import store from '@/store';
 
+// api를 heroku에서 불러오도록 경로 추가
+const API_BASE_URL = process.env.VUE_APP_VITE_API_BASE_URL || 'https://harvy-dev-f064f0b3b0ee.herokuapp.com/api/';
+console.log('API_BASE_URL:', API_BASE_URL);
+
 const api = axios.create({
-    // api를 heroku에서 불러오도록 변경
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://harvy-dev-f064f0b3b0ee.herokuapp.com/api/',
     // baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8000/api/',
+    baseURL: API_BASE_URL,
     timeout: 5000,
     headers: {
         'Content-Type': 'application/json',
