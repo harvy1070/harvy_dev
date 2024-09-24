@@ -2,7 +2,9 @@ import axios from 'axios';
 import store from '@/store';
 
 const api = axios.create({
-    baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8000/api/',
+    // api를 heroku에서 불러오도록 변경
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://harvy-dev-f064f0b3b0ee.herokuapp.com/api/',
+    // baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8000/api/',
     timeout: 5000,
     headers: {
         'Content-Type': 'application/json',

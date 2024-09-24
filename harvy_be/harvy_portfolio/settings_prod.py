@@ -1,9 +1,13 @@
 import os
 import dj_database_url
 from .settings import *
+from urllib.parse import urlparse
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 SECRET_KEY = os.environ.get('SECRET_KEY')
+# Heroku 환경을 위한 Redis 설정
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
+url = urlparse(REDIS_URL)
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'harvy-dev-f064f0b3b0ee.herokuapp.com,localhost,127.0.0.1').split(',')
 
@@ -75,10 +79,22 @@ LOGGING = {
 # Heroku 환경을 위한 RQ 설정 오버라이드
 RQ_QUEUES = {
     'default': {
-        'HOST': os.getenv('REDIS_HOST', 'localhost'),
-        'PORT': int(os.getenv('REDIS_PORT', 6379)),
+        'HOST': url.hostname,
+        'PORT': url.port,
         'DB': 0,
-        'PASSWORD': os.getenv('REDIS_PASSWORD', ''),
+        'PASSWORD': url.password,
+        'SSL': url.scheme == 'rediss',
         'DEFAULT_TIMEOUT': 360,
-    },
+    }
+}
+
+# 캐시 설정 업데이트
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
 }
