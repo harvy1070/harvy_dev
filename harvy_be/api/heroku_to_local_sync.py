@@ -15,10 +15,6 @@ sys.path.append(project_root)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "harvy_portfolio.settings_dev")
 django.setup()
 
-# Django 설정 로드 (개발 환경 설정 사용)
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "harvy_portfolio.settings_dev")
-django.setup()
-
 def is_local_db_active():
     try:
         connection = psycopg2.connect(
