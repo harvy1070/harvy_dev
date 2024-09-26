@@ -13,6 +13,8 @@ sys.path.append(project_root)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "harvy_portfolio.settings_dev")
 django.setup()
 
+# 로컬 데이터베이스 연결을 확인하는 함수
+# 연결이 성공하면 True, 실패하면 False를 반환
 def is_heroku_db_active():
     try:
         connection = psycopg2.connect(
@@ -27,6 +29,12 @@ def is_heroku_db_active():
     except psycopg2.OperationalError:
         return False
 
+# Heroku DB에서 로컬 DB로 데이터를 동기화하는 주요 함수
+# 1. 로컬 DB 활성화 여부 확인
+# 2. 동기화할 모델 목록 정의
+# 3. 각 모델에 대해:
+#    - Heroku DB에서 데이터 가져오기
+#    - 로컬 DB에 데이터 update_or_create
 def sync_data():
     if not is_heroku_db_active():
         print("Heroku 데이터베이스에 연결할 수 없습니다. 동기화를 건너뜁니다.")
