@@ -1,12 +1,12 @@
 import axios from 'axios';
 import store from '@/store';
 
-// api를 heroku에서 불러오도록 경로 추가
-const API_BASE_URL = process.env.VUE_APP_VITE_API_BASE_URL || 'https://harvy-dev-f064f0b3b0ee.herokuapp.com/api/';
+// 환경에 따라 API 기본 URL 설정
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
+console.log('Current Environment:', process.env.NODE_ENV);
 console.log('API_BASE_URL:', API_BASE_URL);
 
 const api = axios.create({
-    // baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8000/api/',
     baseURL: API_BASE_URL,
     timeout: 5000,
     headers: {
@@ -48,7 +48,7 @@ api.interceptors.response.use(
     }
 );
 
-// 로그인 함수
+// API 함수들은 그대로 유지
 api.login = async (credentials) => {
     const response = await api.post('auth/login/', credentials);
     if (response.data.access) {
@@ -57,13 +57,11 @@ api.login = async (credentials) => {
     return response.data;
 };
 
-// 회원가입 함수 추가
 api.signup = async (formData) => {
-    const response = await api.post('signup/', formData); // 회원가입 API 호출
+    const response = await api.post('signup/', formData);
     return response.data;
 };
 
-// 관리자 확인 함수
 api.checkAdmin = async () => {
     const response = await api.get('check-admin/');
     return response.data.isAdmin;
