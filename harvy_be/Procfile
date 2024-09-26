@@ -1,2 +1,2 @@
-web: gunicorn harvy_portfolio.wsgi --log-file -
+web: gunicorn harvy_portfolio.wsgi --log-file - --access-logfile - --error-logfile -
 worker: python manage.py rqworker default

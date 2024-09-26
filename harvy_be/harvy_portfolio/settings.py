@@ -36,6 +36,12 @@ RQ_QUEUES = {
     },
 }
 
+# Windows 환경을 위한 설정
+if os.name == 'nt':
+    RQ = {
+        'WORKER_CLASS': 'rq.SimpleWorker',
+    }
+
 # 캐시 설정 추가
 CACHES = {
     "default": {
@@ -63,31 +69,10 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'debug.log',
-        },
     },
     'root': {
-        'handlers': ['console', 'file'],
-        'level': 'INFO',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django.db.backends': {
-            'level': 'ERROR',
-            'handlers': ['console', 'file'],
-            'propagate': False,
-        },
-        'rq.worker': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-        },
+        'handlers': ['console'],
+        'level': 'DEBUG',
     },
 }
 

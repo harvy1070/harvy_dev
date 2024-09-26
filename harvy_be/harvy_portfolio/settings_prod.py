@@ -72,18 +72,30 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'WARNING',
+        'level': os.getenv('LOG_LEVEL', 'INFO'),
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'api': {
+            'handlers': ['console'],
+            'level': os.getenv('LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'rq.worker': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
     },
 }
 
 # Heroku 환경을 위한 RQ 설정 오버라이드
 RQ_QUEUES = {
     'default': {
-        'HOST': url.hostname,
-        'PORT': url.port,
-        'DB': 0,
-        'PASSWORD': url.password,
-        'SSL': url.scheme == 'rediss',
+        'URL': REDIS_URL,
         'DEFAULT_TIMEOUT': 360,
     }
 }

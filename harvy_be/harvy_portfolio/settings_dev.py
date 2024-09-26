@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 
 # .env 파일에서 환경 변수 로드
 load_dotenv()
-
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # 환경 변수에서 SECRET_KEY 가져오기
