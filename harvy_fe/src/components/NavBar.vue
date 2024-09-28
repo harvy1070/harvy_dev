@@ -24,7 +24,7 @@
                     >Portfolio</router-link
                 >
                 <router-link to="/qna" class="navbar-item" :class="{ 'is-active': $route.path === '/qna' }"
-                    >Q&A</router-link
+                    >Portfolio Matching</router-link
                 >
                 <div v-if="isLoggedIn" class="user-menu" @blur="closeDropdown" tabindex="0">
                     <div @click="toggleDropdown" class="user-greeting">
