@@ -4,47 +4,67 @@
             <div class="navbar-brand">
                 <router-link to="/" class="navbar-item">Developer Kwon</router-link>
             </div>
-            <div class="hamburger" @click="toggleMenu">
+            <div class="hamburger" @click="toggleMenu" :class="{ 'is-active': isMenuOpen }">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
-            <div class="navbar-menu" :class="{ 'is-active': isMenuOpen }">
-                <router-link to="/" class="navbar-item" :class="{ 'is-active': $route.path === '/' }">Home</router-link>
-                <router-link to="/about" class="navbar-item" :class="{ 'is-active': $route.path === '/about' }"
-                    >About</router-link
-                >
-                <router-link
-                    to="/project-history"
-                    class="navbar-item"
-                    :class="{ 'is-active': $route.path === '/project-history' }"
-                    >Project History</router-link
-                >
-                <router-link to="/portfolio" class="navbar-item" :class="{ 'is-active': $route.path === '/portfolio' }"
-                    >Portfolio</router-link
-                >
-                <router-link to="/qna" class="navbar-item" :class="{ 'is-active': $route.path === '/qna' }"
-                    >Portfolio Matching</router-link
-                >
-                <div v-if="isLoggedIn" class="user-menu" @blur="closeDropdown" tabindex="0">
-                    <div @click="toggleDropdown" class="user-greeting">
-                        <span class="user-name">{{ userName }}</span>
-                        <span class="greeting-text">님 반갑습니다.</span>
-                    </div>
-                    <div v-show="isDropdownOpen" class="dropdown-menu">
-                        <a @click="logout" class="dropdown-item">로그아웃</a>
-                    </div>
+        </div>
+        <div class="navbar-menu" :class="{ 'is-active': isMenuOpen }">
+            <router-link to="/" class="navbar-item" :class="{ 'is-active': $route.path === '/' }" @click="closeMenu"
+                >Home</router-link
+            >
+            <router-link
+                to="/about"
+                class="navbar-item"
+                :class="{ 'is-active': $route.path === '/about' }"
+                @click="closeMenu"
+                >About</router-link
+            >
+            <router-link
+                to="/project-history"
+                class="navbar-item"
+                :class="{ 'is-active': $route.path === '/project-history' }"
+                @click="closeMenu"
+                >Project History</router-link
+            >
+            <router-link
+                to="/portfolio"
+                class="navbar-item"
+                :class="{ 'is-active': $route.path === '/portfolio' }"
+                @click="closeMenu"
+                >Portfolio</router-link
+            >
+            <router-link
+                to="/qna"
+                class="navbar-item"
+                :class="{ 'is-active': $route.path === '/qna' }"
+                @click="closeMenu"
+                >Portfolio Matching</router-link
+            >
+            <div v-if="isLoggedIn" class="user-menu">
+                <div @click="toggleDropdown" class="user-greeting">
+                    <span class="user-name">{{ userName }}</span>
+                    <span class="greeting-text">님 반갑습니다.</span>
                 </div>
-                <router-link v-else to="/login" class="navbar-item" :class="{ 'is-active': $route.path === '/login' }"
-                    >Login</router-link
-                >
+                <div v-show="isDropdownOpen" class="dropdown-menu">
+                    <a @click="logout" class="dropdown-item">로그아웃</a>
+                </div>
             </div>
+            <router-link
+                v-else
+                to="/login"
+                class="navbar-item"
+                :class="{ 'is-active': $route.path === '/login' }"
+                @click="closeMenu"
+                >Login</router-link
+            >
         </div>
     </nav>
 </template>
 
 <script>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -54,6 +74,7 @@ export default {
         const store = useStore();
         const router = useRouter();
         const isDropdownOpen = ref(false);
+        const isMenuOpen = ref(false);
 
         const isLoggedIn = computed(() => store.getters['auth/isAuthenticated']);
         const userName = computed(() => {
@@ -74,11 +95,28 @@ export default {
             router.push('/login');
         };
 
-        const isMenuOpen = ref(false);
-
         const toggleMenu = () => {
             isMenuOpen.value = !isMenuOpen.value;
         };
+
+        const closeMenu = () => {
+            isMenuOpen.value = false;
+        };
+
+        const handleOutsideClick = (event) => {
+            const navbar = document.querySelector('.navbar');
+            if (navbar && !navbar.contains(event.target)) {
+                closeMenu();
+            }
+        };
+
+        onMounted(() => {
+            document.addEventListener('click', handleOutsideClick);
+        });
+
+        onUnmounted(() => {
+            document.removeEventListener('click', handleOutsideClick);
+        });
 
         return {
             isLoggedIn,
@@ -89,6 +127,7 @@ export default {
             closeDropdown,
             isMenuOpen,
             toggleMenu,
+            closeMenu,
         };
     },
 };
@@ -109,54 +148,85 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 0.5rem 1rem;
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
     color: #346aff;
 }
 
 .navbar-menu {
+    display: none;
+}
+
+.hamburger {
     display: flex;
-    gap: 1rem;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.hamburger span {
+    width: 2rem;
+    height: 0.25rem;
+    background-color: #333;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+}
+
+.hamburger.is-active span:first-child {
+    transform: rotate(45deg);
+}
+
+.hamburger.is-active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.is-active span:nth-child(3) {
+    transform: rotate(-45deg);
+}
+
+.navbar-menu.is-active {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 3rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    padding: 1rem;
 }
 
 .navbar-item {
     text-decoration: none;
     color: #333;
     font-weight: 500;
-    transition: color 0.3s ease;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.navbar-item:hover,
 .navbar-item.is-active {
     color: #3498db;
-}
-
-.navbar-item.is-active {
     font-weight: 700;
-    border-bottom: 2px solid #3498db;
 }
 
 .user-menu {
-    position: relative;
-    cursor: pointer;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .user-greeting {
     display: flex;
     align-items: center;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-.user-greeting:hover {
-    background-color: #f5f5f5;
 }
 
 .user-name {
@@ -171,89 +241,63 @@ export default {
 }
 
 .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background-color: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1001;
-    min-width: 150px;
     margin-top: 0.5rem;
 }
 
 .dropdown-item {
     display: block;
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0;
     color: #333;
     text-decoration: none;
-    transition: background-color 0.3s ease;
 }
 
-.dropdown-item:hover {
-    background-color: #f5f5f5;
-}
-
-/* 모바일 때문에 햄버거 추가  */
-.hamburger {
-    display: none;
-    flex-direction: column;
-    justify-content: space-around;
-    width: 2rem;
-    height: 2rem;
-    cursor: pointer;
-}
-
-.hamburger span {
-    display: block;
-    width: 100%;
-    height: 2px;
-    background-color: #333;
-    transition: all 0.3s linear;
-}
-
-@media (max-width: 768px) {
+@media (min-width: 769px) {
     .navbar-content {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     .hamburger {
-        display: flex;
+        display: none;
     }
 
     .navbar-menu {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background-color: #ffffff;
-        flex-direction: column;
-        width: 100%;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
     }
 
     .navbar-menu.is-active {
-        display: flex;
+        position: static;
+        flex-direction: row;
+        padding: 0;
     }
 
     .navbar-item {
-        padding: 1rem;
-        border-top: 1px solid #e0e0e0;
+        padding: 0.5rem 1rem;
+        border-bottom: none;
+    }
+
+    .navbar-item.is-active {
+        border-bottom: 2px solid #3498db;
     }
 
     .user-menu {
-        width: 100%;
+        position: relative;
+        border-bottom: none;
     }
 
     .dropdown-menu {
-        position: static;
-        width: 100%;
-        margin-top: 0;
-        box-shadow: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropdown-item {
+        padding: 0.5rem 1rem;
     }
 }
 </style>
