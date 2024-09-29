@@ -23,4 +23,4 @@ pnpm-debug.log*
 *.sw?
 
 # pdf파일 관리
-pdf_files/
+harvy_be/pdf_files/

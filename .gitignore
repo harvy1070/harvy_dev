@@ -25,4 +25,4 @@ db.sqlite3
 *.log
 
 # pdf파일 관리
-pdf_files/
+harvy_be/pdf_files/
