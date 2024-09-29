@@ -180,3 +180,6 @@ class PjTimelineViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return PjTimeline.objects.all().order_by('order_num', '-date')
     # 타임라인 항목을 order_num과 date 기준으로 정렬하여 반환
+    
+    
+# Chatbot view 추가 // 9. 29. ~

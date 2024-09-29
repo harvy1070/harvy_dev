@@ -23,3 +23,6 @@ __pycache__
 db.sqlite3
 .env
 *.log
+
+# pdf파일 관리
+pdf_files/

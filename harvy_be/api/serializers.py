@@ -116,11 +116,11 @@ class PortfolioBoardSerializer(serializers.ModelSerializer):
         return representation
 
 # Pf의 File 관리
-class PortfolioFilesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PortfolioFiles
-        fields = ['id', 'portfolio', 'file_name', 'file_path', 'file_size', 'file_type', 'upload_date']
-        read_only_fields = ['id', 'upload_date']
+# class PortfolioFilesSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = PortfolioFiles
+#         fields = ['id', 'portfolio', 'file_name', 'file_path', 'file_size', 'file_type', 'upload_date']
+#         read_only_fields = ['id', 'upload_date']
 
 # 프로젝트 연혁 관리
 class PjTimelineSerializer(serializers.ModelSerializer):
@@ -129,4 +129,39 @@ class PjTimelineSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'role', 'company', 'order_company', 'description', 'date', 'order_num']
         read_only_fields = ['id']
         
-     
+# Chatbot 관련 시리얼라이저 추가 // 9. 29.
+
+# chatsession
+class ChatSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatSession
+        fields = ['id', 'user_id', 'session_id', 'created_at', 'last_interaction']
+        read_only_fields = ['id', 'created_at', 'last_interaction']
+        
+# chatmessage
+class ChatMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatMessage
+        fields = ['id', 'session', 'is_user', 'message', 'timestamp']
+        read_only_fields = ['id', 'timestamp']
+        
+# userpreference
+class UserPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPreference
+        fields = ['id', 'user_id', 'pref_pf_types', 'pref_tech', 'last_updated']
+        read_only_fields = ['id', 'last_updated']
+        
+# portfoliokeyword
+class PortfolioKeywordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PortfolioKeyword
+        fields = ['id', 'portfolio', 'keyword', 'frequency']
+        read_only_fields = ['id']
+        
+# PortfolioFiles 시리얼라이저 수정
+class PortfolioFilesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PortfolioFiles
+        fields = ['id', 'portfolio', 'file_name', 'file_identifier', 'file_content', 'file_size', 'file_type', 'upload_date']
+        read_only_fields = ['id', 'upload_date']

@@ -39,7 +39,7 @@
                     class="navbar-item"
                     :class="{ 'is-active': $route.path === '/qna' }"
                     @click="closeMenu"
-                    >Portfolio Matching</router-link
+                    >PM Chatbot</router-link
                 >
                 <div v-if="isLoggedIn" class="user-menu">
                     <div @click="toggleDropdown" class="user-greeting">
