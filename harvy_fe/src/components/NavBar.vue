@@ -142,7 +142,7 @@ export default {
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    height: 80px; /* 네비게이션 바 높이 유지 */
+    height: 80px;
 }
 
 .navbar-content {
@@ -156,7 +156,7 @@ export default {
 }
 
 .navbar-brand {
-    font-size: 1.2rem; /* 원래 크기로 복원 */
+    font-size: 1.2rem;
     font-weight: bold;
     color: #346aff;
 }
@@ -203,7 +203,7 @@ export default {
     color: #333;
     font-weight: 500;
     padding: 0.5rem 1rem;
-    font-size: 1rem; /* 원래 크기로 복원 */
+    font-size: 1rem;
 }
 
 .navbar-item.is-active {

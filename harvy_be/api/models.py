@@ -97,21 +97,6 @@ class PortfolioBoard(models.Model):
     def __str__(self):
         return self.board_title
 
-# Portfolio 게시판에 올리는 파일 관리하는 모델 정의
-class PortfolioFiles(models.Model):
-    portfolio = models.ForeignKey(PortfolioBoard, on_delete=models.CASCADE, related_name='files')
-    file_name = models.CharField(max_length=255, verbose_name='업로드된 파일 이름')
-    file_path = models.CharField(max_length=255, verbose_name='파일 저장 경로')
-    file_size = models.IntegerField(blank=True, null=True, verbose_name='파일 크기 (바이트)')
-    file_type = models.CharField(max_length=50, blank=True, null=True, verbose_name='파일 MIME 타입')
-    upload_date = models.DateTimeField(auto_now_add=True, verbose_name='파일 업로드 일시')
-
-    class Meta:
-        db_table = 'portfoliofiles'
-
-    def __str__(self):
-        return self.file_name
-
 # 개인 연혁 관련 모델 정의 
 class PjTimeline(models.Model):
     # TYPE_CHOICES = (
@@ -133,3 +118,61 @@ class PjTimeline(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.date})"
+    
+    
+# Portfolio Matching Chatbot 부분 모델 추가 // 9. 29.
+# 대화 세션 관리
+class ChatSession(models.Model):
+    user_id = models.ForeignKey(UserInfo, on_delete=models.CASCADE, null=True, blank=True)
+    session_id = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_interaction = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'chatsession'
+        
+# 각 대화 세션 내 개별 메시지 저장
+class ChatMessage(models.Model):
+    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE)
+    is_user = models.BooleanField()  # 사용자가 보낸 메시지인 경우 True, 봇이 보낸 메시지인 경우 False
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'chatmessage'
+        
+# 사용자 선호도나 관심사 저장
+class UserPreference(models.Model):
+    user_id = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
+    pref_pf_types = models.CharField(max_length=100)  # 쉼표로 구분된 선호 포트폴리오 유형
+    pref_tech = models.TextField()  # 선호하는 기술 스택
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'userpreference'
+       
+# 포트폴리오에서 추출된 키워드 저장
+class PortfolioKeyword(models.Model):
+    portfolio = models.ForeignKey(PortfolioBoard, on_delete=models.CASCADE, related_name='keywords')
+    keyword = models.CharField(max_length=50)
+    frequency = models.IntegerField(default=1)  # 키워드 빈도수
+
+    class Meta:
+        db_table = 'portfoliokeyword'
+        unique_together = ('portfolio', 'keyword')
+    
+    def __str__(self):
+        return f"{self.keyword} ({self.frequency})"
+    
+# PDF 파일 보관
+class PortfolioFiles(models.Model):
+    portfolio = models.ForeignKey(PortfolioBoard, on_delete=models.CASCADE, related_name='files')
+    file_name = models.CharField(max_length=255, verbose_name='업로드된 파일 이름')
+    file_identifier = models.CharField(max_length=255, verbose_name='파일 식별자', null=True, blank=True)
+    file_content = models.TextField(verbose_name='추출된 파일 내용', null=True, blank=True)
+    file_size = models.IntegerField(verbose_name='파일 크기 (바이트)', null=True, blank=True)
+    file_type = models.CharField(max_length=50, verbose_name='파일 MIME 타입', null=True, blank=True)
+    upload_date = models.DateTimeField(auto_now_add=True, verbose_name='파일 업로드 일시', null=True, blank=True)
+
+    class Meta:
+        db_table = 'portfoliofiles'
