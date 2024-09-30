@@ -22,4 +22,13 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('check-admin/', check_admin, name='check-admin'),
     path('signup/', AuthViewSet.as_view({'post': 'signup'}), name='signup'),
+
+    # 챗봇 관련 URL 추가
+    path('chatbot/', include([
+        path('session/', ChatbotSessionView.as_view(), name='chatbot_session_create'),
+        path('session/<str:session_id>/', ChatbotSessionView.as_view(), name='chatbot_session_delete'),
+        path('message/<str:session_id>/', ChatbotMessageView.as_view(), name='chatbot_message'),
+        path('recommend/<str:session_id>/', PortfolioRecommendationView.as_view(), name='portfolio_recommendation'),
+        path('preference/<int:user_id>/', UserPreferenceUpdateView.as_view(), name='user_preference_update'),
+    ])),
 ]

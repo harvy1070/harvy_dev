@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Prefetch
 
 from django.contrib.auth import get_user_model
+from .chatbot import Chatbot
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -183,3 +184,55 @@ class PjTimelineViewSet(viewsets.ModelViewSet):
     
     
 # Chatbot view 추가 // 9. 29. ~
+class ChatbotSessionView(APIView):
+    def post(self, request):
+        # 새로운 챗봇 세션 시작
+        user = request.user if request.user.is_authenticated else None
+        chatbot = Chatbot(user_id=user.id if user else None)
+        serializer = ChatSessionSerializer(chatbot.session)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, session_id):
+        # 챗봇 세션 종료
+        try:
+            session = ChatSession.objects.get(session_id=session_id)
+            session.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except ChatSession.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class ChatbotMessageView(APIView):
+    def post(self, request, session_id):
+        # 사용자 메시지 처리 및 챗봇 응답 생성
+        try:
+            session = ChatSession.objects.get(session_id=session_id)
+            chatbot = Chatbot(session_id=session_id)
+            user_message = request.data.get('message', '')
+            response = chatbot.process_message(user_message)
+            return Response({'response': response}, status=status.HTTP_200_OK)
+        except ChatSession.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class PortfolioRecommendationView(APIView):
+    def get(self, request, session_id):
+        # 포트폴리오 추천
+        try:
+            session = ChatSession.objects.get(session_id=session_id)
+            chatbot = Chatbot(session_id=session_id)
+            recommendations = chatbot.recommend_portfolio()
+            return Response(recommendations, status=status.HTTP_200_OK)
+        except ChatSession.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class UserPreferenceUpdateView(APIView):
+    def put(self, request, user_id):
+        # 사용자 선호도 업데이트
+        try:
+            preference = UserPreference.objects.get(user_id=user_id)
+            serializer = UserPreferenceSerializer(preference, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except UserPreference.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
