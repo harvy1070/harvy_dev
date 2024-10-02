@@ -18,12 +18,13 @@ router.register(r'timeline', PjTimelineViewSet)
 # 패턴 목록 정의
 urlpatterns = [
     path('', include(router.urls)),
+    # JWT
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('check-admin/', check_admin, name='check-admin'),
     path('signup/', AuthViewSet.as_view({'post': 'signup'}), name='signup'),
 
-    # 챗봇 관련 URL 추가
+    # 챗봇 관련 URL 추가 // 가독성을 위해 다른 방식으로 접근해보았음
     path('chatbot/', include([
         path('session/', ChatbotSessionView.as_view(), name='chatbot_session_create'),
         path('session/<str:session_id>/', ChatbotSessionView.as_view(), name='chatbot_session_delete'),
