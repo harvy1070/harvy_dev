@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from django.utils import timezone
 
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -136,7 +137,7 @@ class ChatSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatSession
         fields = ['id', 'user_id', 'session_id', 'created_at', 'last_interaction']
-        read_only_fields = ['id', 'created_at', 'last_interaction']
+        read_only_fields = ['id', 'created_at']
         
 # chatmessage
 class ChatMessageSerializer(serializers.ModelSerializer):
@@ -144,6 +145,10 @@ class ChatMessageSerializer(serializers.ModelSerializer):
         model = ChatMessage
         fields = ['id', 'session', 'is_user', 'message', 'timestamp']
         read_only_fields = ['id', 'timestamp']
+        
+    def create(self, validated_data):
+        validated_data['timestamp'] = timezone.now()
+        return super().create(validated_data)
         
 # userpreference
 class UserPreferenceSerializer(serializers.ModelSerializer):
@@ -167,3 +172,11 @@ class PortfolioFilesSerializer(serializers.ModelSerializer):
         model = PortfolioFiles
         fields = ['id', 'portfolio', 'file_name', 'file_identifier', 'file_content', 'file_size', 'file_type', 'upload_date']
         read_only_fields = ['id', 'upload_date']
+        
+# Chatbot 응답용 시리얼라이저 추가
+# model엔 없지만, API 구조를 정의하는 용도로 비모델 시리얼라이저를 추가할 수 있다고 함
+# - API 응답 구조화
+# - 여러 모델의 데이터를 조합하여 하나의 응답으로 만들 때 사용된다고 함
+class ChatbotResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+    recommend_pf = PortfolioBoardSerializer(many=True, read_only=True)
