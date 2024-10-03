@@ -147,6 +147,8 @@ class ChatMessageSerializer(serializers.ModelSerializer):
         
 # userpreference
 class UserPreferenceSerializer(serializers.ModelSerializer):
+    # 역직렬화로 연관된 userinfo 객체를 찾기 위해 다시 정의
+    user_id = serializers.PrimaryKeyRelatedField(queryset=UserInfo.objects.all())
     class Meta:
         model = UserPreference
         fields = ['id', 'user_id', 'pref_pf_types', 'pref_tech', 'last_updated']
