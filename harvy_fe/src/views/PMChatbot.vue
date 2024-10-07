@@ -1,6 +1,12 @@
 <template>
     <div class="pm-chatbot">
-        <h1>PM Chatbot</h1>
+        <div class="pm-intro">
+            <h1 class="h1">PM Chatbot이란?</h1>
+            <h2 class="h2">
+                Portfolio Matching Chatbot으로 사용자가 챗봇과의 상호작용을 통해<br />
+                사용자가 원하는 포트폴리오를 추천받을 수 있도록 하는 시스템입니다.<br />
+            </h2>
+        </div>
         <div class="chat-container">
             <div class="chat-messages" ref="chatMessages">
                 <div
@@ -59,6 +65,23 @@ export default {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
+}
+
+.pm-intro {
+    margin-top: 70px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.h2 {
+    font-size: 1.2em;
+    line-height: 1.5;
+    color: #666;
 }
 
 .chat-container {

@@ -134,8 +134,8 @@ class ChatSession(models.Model):
 # 각 대화 세션 내 개별 메시지 저장
 class ChatMessage(models.Model):
     session = models.ForeignKey(ChatSession, on_delete=models.CASCADE)
-    is_user = models.BooleanField()  # 사용자가 보낸 메시지인 경우 True, 봇이 보낸 메시지인 경우 False
-    message = models.TextField()
+    user_message = models.TextField(null=True, blank=True)
+    gpt_message = models.TextField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
