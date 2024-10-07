@@ -35,9 +35,9 @@
                     >Portfolio</router-link
                 >
                 <router-link
-                    to="/qna"
+                    to="/pm-chatbot"
                     class="navbar-item"
-                    :class="{ 'is-active': $route.path === '/qna' }"
+                    :class="{ 'is-active': $route.path === '/pm-chatbot' }"
                     @click="closeMenu"
                     >PM Chatbot</router-link
                 >
