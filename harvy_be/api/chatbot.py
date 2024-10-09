@@ -1,5 +1,5 @@
 # chatbot/chatbot.py
-import openai
+from openai import OpenAI
 from django.utils import timezone
 from django.conf import settings
 from .models import *
@@ -10,13 +10,14 @@ from django.db.models import Prefetch
 import logging
 from django.contrib.sessions.models import Session
 
-openai.api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # 입출력값 조절
 MAX_INPUT_LEN = 500
 MAX_OUTPUT_LEN = 1000
 MAX_TOKENS = 500
 
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 class Chatbot:
@@ -81,21 +82,21 @@ class Chatbot:
             
             prompt = f"이전 대화 내용입니다. \n{conv_history}\n\n사용자: {message}\n\n추천 포트폴리오 정보:\n{pf_info}\n\n 위 정보를 바탕으로 답변합니다."
         
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "system", "content": prompt}],
                 max_tokens=MAX_TOKENS
             )
-            gpt_response = response.choices[0].message['content'].strip()
+            gpt_response = response.choices[0].message.content.strip()
 
             if len(gpt_response) > MAX_OUTPUT_LEN:
                 gpt_response = gpt_response[:MAX_OUTPUT_LEN] + "..."
             
             return gpt_response
         except Exception as e:
-            print(f"OpenAI API 오류: {e}")
+            logger.error(f"OpenAI API 오류: {str(e)}")
             return "현재 응답을 생성하는 데 오류가 생겼습니다. 관리자에게 문의 바랍니다."
-            
+        
     def get_conv_history(self):
         if self.user:
             recent_messages = ChatMessage.objects.filter(user=self.user).order_by('-id')[:5]
@@ -116,54 +117,70 @@ class Chatbot:
         
     # 최근 대화내용 불러오기
     def recommend_portfolio(self):
-        conversation = self.get_conv_history()
-        
-        user_pref = None
-        if self.user:
-            user_pref = UserPreference.objects.filter(user=self.user).first()
-        
-        # 추천 로직
-        recommend_pf = []
-        portfolios = PortfolioBoard.objects.prefetch_related(
-            Prefetch('keywords', queryset=PortfolioKeyword.objects.all(), to_attr='prefetched_keywords')
-        )
-        
-        for pf in portfolios:
-            pf_keywords = " ".join([kw.keyword for kw in pf.prefetched_keywords])
+        try:
+            conversation = self.get_conv_history()
             
-            # 대화 내용과의 유사도 계산
-            is_similar_conv, similarity_score = is_similar(conversation, pf_keywords, threshold=0.3)
+            # 대화 내용이 문자열인지 확인
+            if not isinstance(conversation, str):
+                conversation = ' '.join(map(str, conversation))
             
-            score = similarity_score
+            user_pref = None
+            if self.user:
+                user_pref = UserPreference.objects.filter(user=self.user).first()
             
-            # 선호도 반영
-            if user_pref:
-                if pf.pf_type in user_pref.pref_pf_types.split(','):
-                    score += 0.2
-                pref_techs = user_pref.pref_tech.split(',')
-                if any(tech.strip().lower() in pf_keywords.lower() for tech in pref_techs):
-                    score += 0.1
+            # 추천 로직
+            recommend_pf = []
+            portfolios = PortfolioBoard.objects.prefetch_related(
+                Prefetch('keywords', queryset=PortfolioKeyword.objects.all(), to_attr='prefetched_keywords')
+            )
             
-            if score > 0:
-                recommend_pf.append((pf, score))
-        
-        # 점수에 따라 정렬
-        recommend_pf.sort(key=lambda x: x[1], reverse=True)
+            for pf in portfolios:
+                try:
+                    pf_keywords = " ".join([kw.keyword for kw in pf.prefetched_keywords])
+                    
+                    # 키워드가 문자열인지 확인
+                    if not isinstance(pf_keywords, str):
+                        pf_keywords = ' '.join(map(str, pf_keywords))
+                    
+                    # 대화 내용과의 유사도 계산
+                    is_similar_conv, similarity_score = is_similar(conversation, pf_keywords, threshold=0.3)
+                    
+                    score = similarity_score
+                    
+                    # 선호도 반영
+                    if user_pref:
+                        if pf.pf_type in user_pref.pref_pf_types.split(','):
+                            score += 0.2
+                        pref_techs = user_pref.pref_tech.split(',')
+                        if any(tech.strip().lower() in pf_keywords.lower() for tech in pref_techs):
+                            score += 0.1
+                    
+                    if score > 0:
+                        recommend_pf.append((pf, score))
+                except Exception as e:
+                    logger.error(f"포트폴리오 {pf.id} 처리 중 오류 발생: {str(e)}")
+                    continue
+            
+            # 점수에 따라 정렬
+            recommend_pf.sort(key=lambda x: x[1], reverse=True)
 
-        # 상위 3개 포트폴리오 반환
-        top_recommendations = recommend_pf[:3]
-        
-        if top_recommendations:
-            recommendations = []
-            for pf, score in top_recommendations:
-                recommendations.append({
-                    'id': pf.id,
-                    'title': pf.board_title,
-                    'description': pf.board_semidesc,
-                    'score': round(score, 2)
-                })
-            return recommendations
-        else:
+            # 상위 3개 포트폴리오 반환
+            top_recommendations = recommend_pf[:3]
+            
+            if top_recommendations:
+                recommendations = []
+                for pf, score in top_recommendations:
+                    recommendations.append({
+                        'id': pf.id,
+                        'title': pf.board_title,
+                        'description': pf.board_semidesc,
+                        'score': round(score, 2)
+                    })
+                return recommendations
+            else:
+                return []
+        except Exception as e:
+            logger.error(f"포트폴리오 추천 중 오류 발생: {str(e)}")
             return []
             
     # 포트폴리오 추천 정보 및 유사도 측정

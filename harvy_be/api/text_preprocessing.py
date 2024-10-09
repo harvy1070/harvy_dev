@@ -11,7 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "harvy_portfolio.settings_dev")
 django.setup()
 
 from django.db import transaction
-from api.models import PortfolioBoard, PortfolioKeyword
+from api.models import PortfolioKeyword
 
 # 불용어 목록 읽어와서 set으로 변환
 def load_stopwords(file_path):
@@ -44,10 +44,7 @@ def extract_keywords(text, stopwords):
     words.extend(code_words)
     
     # 상위 50개 설정
-    # return Counter(words).most_common(50)  # 상위 50개 키워드로 증가
-
-    # 전체 키워드 반환
-    return Counter(words).items()
+    return Counter(words).most_common(50)
 
 # .txt 순차적으로 처리
 def process_txt_files(folder_path, stopwords):
@@ -56,33 +53,29 @@ def process_txt_files(folder_path, stopwords):
             file_path = os.path.join(folder_path, filename)
             print(f"{filename} 파일을 처리 중...")
             
-            with open(file_path, 'r', encoding='utf-8') as file:
-                text = file.read()
-            
-            processed_text = preprocess_text(text)
-            keywords = extract_keywords(processed_text, stopwords)
-            
-            # 정상적으로 추출되는지 테스트
-            # print(f"Top 20 keywords for {filename}:")
-            # for keyword, frequency in keywords:
-            #     print(f"{keyword}: {frequency}")
-            
-            # 테스트 후 해제(저장)
-            portfolio_title = os.path.splitext(filename)[0]
-            save_to_database(portfolio_title, keywords)
-            print(f"{filename} 파일의 키워드가 처리 및 저장 완료")
+            try:
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    text = file.read()
+                
+                processed_text = preprocess_text(text)
+                keywords = extract_keywords(processed_text, stopwords)
+                
+                portfolio_title = os.path.splitext(filename)[0]
+                save_to_database(portfolio_title, keywords)
+                print(f"{filename} 파일의 키워드가 처리 및 저장 완료")
+            except Exception as e:
+                print(f"{filename} 처리 중 오류 발생: {str(e)}")
 
-# DB에 저장(테스트 이후 진행)
+# DB에 저장
 @transaction.atomic
 def save_to_database(portfolio_title, keywords):
-    portfolio, created = PortfolioBoard.objects.get_or_create(board_title=portfolio_title)
-    PortfolioKeyword.objects.filter(portfolio=portfolio).delete()
+    PortfolioKeyword.objects.filter(portfolio_name=portfolio_title).delete()
     for keyword, frequency in keywords:
         PortfolioKeyword.objects.create(
-            portfolio=portfolio,
             portfolio_name=portfolio_title,
             keyword=keyword,
-            frequency=frequency
+            frequency=frequency,
+            portfolio=None  # portfolio 필드를 명시적으로 None으로 설정
         )
 
 if __name__ == "__main__":

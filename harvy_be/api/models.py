@@ -173,15 +173,15 @@ class UserPreference(models.Model):
        
 # 포트폴리오에서 추출된 키워드 저장
 class PortfolioKeyword(models.Model):
-    portfolio = models.ForeignKey(PortfolioBoard, on_delete=models.CASCADE, related_name='keywords')
+    portfolio = models.ForeignKey(PortfolioBoard, on_delete=models.CASCADE, related_name='keywords', null=True, blank=True)
     portfolio_name = models.CharField(max_length=255, null=True, blank=True)
-    keyword = models.CharField(max_length=50)
-    frequency = models.IntegerField(default=1)  # 키워드 빈도수
+    keyword = models.CharField(max_length=50, null=True, blank=True)
+    frequency = models.IntegerField(default=1, null=True, blank=True)
 
     class Meta:
         db_table = 'portfoliokeyword'
-        unique_together = ('portfolio', 'keyword')
-    # 참조를 포트폴리오 이름으로 추가
+        unique_together = ('portfolio_name', 'keyword')
+
     def __str__(self):
         return f"{self.portfolio_name} - {self.keyword} ({self.frequency})"
     
