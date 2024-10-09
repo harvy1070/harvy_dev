@@ -2,10 +2,10 @@
     <div class="pm-chatbot">
         <div class="pm-intro">
             <h1 class="h1">PM Chatbot이란?</h1>
-            <h2 class="h2">
+            <h3 class="h3">
                 Portfolio Matching Chatbot으로 사용자가 챗봇과의 상호작용을 통해<br />
                 사용자가 원하는 포트폴리오를 추천받을 수 있도록 하는 시스템입니다.<br />
-            </h2>
+            </h3>
         </div>
         <div class="chat-container">
             <div class="chat-messages" ref="chatMessages">
@@ -14,7 +14,7 @@
                     :key="index"
                     :class="['message', message.isUser ? 'user' : 'bot']"
                 >
-                    {{ message.text }}
+                    {{ message.isUser ? message.user_message : message.gpt_message }}
                 </div>
             </div>
             <div class="chat-input">
@@ -36,13 +36,13 @@ export default {
         };
     },
     computed: {
-        ...mapState('chatbot', ['messages']),
+        ...mapState('chatbot', ['messages', 'sessionId']),
     },
     methods: {
         ...mapActions('chatbot', ['sendMessageToBackend', 'initSession']),
         async sendMessage() {
             if (this.userInput.trim()) {
-                await this.sendMessageToBackend(this.userInput);
+                await this.sendMessageToBackend({ message: this.userInput });
                 this.userInput = '';
                 this.$nextTick(() => {
                     this.scrollToBottom();
@@ -74,14 +74,18 @@ export default {
 }
 
 .h1 {
-    font-size: 2em;
-    margin-bottom: 20px;
+    font-size: 1.2em;
+    margin-bottom: -10px;
+    font-weight: 1000;
+    color: #466bda;
 }
 
-.h2 {
-    font-size: 1.2em;
+.h3 {
+    font-size: 1em;
     line-height: 1.5;
-    color: #666;
+    color: #9a9a9a;
+    font-weight: 500;
+    margin-bottom: -10px;
 }
 
 .chat-container {
@@ -130,7 +134,7 @@ input {
 button {
     margin-left: 10px;
     padding: 8px 15px;
-    background-color: #4caf50;
+    background-color: #738ce0;
     color: white;
     border: none;
     border-radius: 4px;

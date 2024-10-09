@@ -187,43 +187,43 @@ class PjTimelineViewSet(viewsets.ModelViewSet):
 # Chatbot view 추가 // 9. 29. ~
 class ChatbotSessionView(APIView):
     def post(self, request):
-        # 새로운 챗봇 세션 시작
-        user = request.user if request.user.is_authenticated else None
-        chatbot = Chatbot(user_id=user.id if user else None)
+        chatbot = Chatbot(request)
         serializer = ChatSessionSerializer(chatbot.session)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request, session_id):
+    def delete(self, request, session_key):
         # 챗봇 세션 종료
         try:
-            session = ChatSession.objects.get(session_id=session_id)
+            session = ChatSession.objects.get(session_key=session_key)
             session.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ChatSession.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 class ChatbotMessageView(APIView):
-    def post(self, request, session_id):
-        # 사용자 메시지 처리 및 챗봇 응답 생성
+    def post(self, request, session_key):
         try:
-            session = ChatSession.objects.get(session_id=session_id)
-            chatbot = Chatbot(session_id=session_id)
+            session = ChatSession.objects.get(session_key=session_key)
+            chatbot = Chatbot(request)
             user_message = request.data.get('message', '')
             response = chatbot.process_message(user_message)
             return Response({'response': response}, status=status.HTTP_200_OK)
         except ChatSession.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Invalid session"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PortfolioRecommendationView(APIView):
     def get(self, request, session_id):
-        # 포트폴리오 추천
         try:
             session = ChatSession.objects.get(session_id=session_id)
             chatbot = Chatbot(session_id=session_id)
             recommendations = chatbot.recommend_portfolio()
             return Response(recommendations, status=status.HTTP_200_OK)
         except ChatSession.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Invalid session"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserPreferenceUpdateView(APIView):
     def put(self, request, user_id):

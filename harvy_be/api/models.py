@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.conf import settings
+import uuid
 
 # 사용자 생성 로직 관리(일반유저, super유저 구분)
 class UserInfoManager(BaseUserManager):
@@ -121,25 +123,35 @@ class PjTimeline(models.Model):
     
     
 # Portfolio Matching Chatbot 부분 모델 추가 // 9. 29.
+# session관련해서 지속적인 에러 발생(문제 해결중) // 10. 8.
 # 대화 세션 관리
 class ChatSession(models.Model):
-    user_id = models.ForeignKey(UserInfo, on_delete=models.CASCADE, null=True, blank=True)
-    session_id = models.CharField(max_length=100, unique=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    session_key = models.CharField(max_length=40, unique=True)
+    # session_id = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_interaction = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'chatsession'
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['session_key']),
+        ]
         
 # 각 대화 세션 내 개별 메시지 저장
 class ChatMessage(models.Model):
-    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE)
-    user_message = models.TextField(null=True, blank=True)
-    gpt_message = models.TextField(null=True, blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    session_key = models.CharField(max_length=40, unique=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    last_interaction = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
         db_table = 'chatmessage'
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['session_key']),
+        ]
         
 # 사용자 선호도나 관심사 저장
 class UserPreference(models.Model):

@@ -136,8 +136,8 @@ class PjTimelineSerializer(serializers.ModelSerializer):
 class ChatSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatSession
-        fields = ['id', 'user_id', 'session_id', 'created_at', 'last_interaction']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'user_id', 'session_key', 'created_at', 'last_interaction']
+        read_only_fields = ['id', 'created_at', 'session_key']
         
 # chatmessage
 class ChatMessageSerializer(serializers.ModelSerializer):

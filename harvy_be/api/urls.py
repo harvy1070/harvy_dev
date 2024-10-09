@@ -27,9 +27,9 @@ urlpatterns = [
     # 챗봇 관련 URL 추가 // 가독성을 위해 다른 방식으로 접근해보았음
     path('chatbot/', include([
         path('session/', ChatbotSessionView.as_view(), name='chatbot_session_create'),
-        path('session/<str:session_id>/', ChatbotSessionView.as_view(), name='chatbot_session_delete'),
-        path('message/<str:session_id>/', ChatbotMessageView.as_view(), name='chatbot_message'),
-        path('recommend/<str:session_id>/', PortfolioRecommendationView.as_view(), name='portfolio_recommendation'),
+        path('session/<str:session_key>/', ChatbotSessionView.as_view(), name='chatbot_session_delete'),
+        path('message/<str:session_key>/', ChatbotMessageView.as_view(), name='chatbot_message'),
+        path('recommend/<str:session_key>/', PortfolioRecommendationView.as_view(), name='portfolio_recommendation'),
         path('preference/<int:user_id>/', UserPreferenceUpdateView.as_view(), name='user_preference_update'),
     ])),
 ]
