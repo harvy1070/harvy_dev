@@ -183,22 +183,33 @@ class PjTimelineViewSet(viewsets.ModelViewSet):
         return PjTimeline.objects.all().order_by('order_num', '-date')
     # 타임라인 항목을 order_num과 date 기준으로 정렬하여 반환
     
-    
+import traceback
+
 # Chatbot view 추가 // 9. 29. ~
 class ChatbotSessionView(APIView):
     def post(self, request):
-        chatbot = Chatbot(request)
-        serializer = ChatSessionSerializer(chatbot.session)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        try:
+            logger.debug("챗봇 세션 생성 요청을 받았습니다.")
+            chatbot = Chatbot(request)
+            if not chatbot.session.session_key:
+                logger.error("세션 키 생성 실패")
+                return Response({"error": "세션 키 생성 실패"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.debug(f"챗봇 세션이 생성되었습니다. 세션 키: {chatbot.session.session_key}")
+            serializer = ChatSessionSerializer(chatbot.session)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"ChatbotSessionView에서 오류 발생: {str(e)}", exc_info=True)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
     def delete(self, request, session_key):
-        # 챗봇 세션 종료
+        # 챗봇 세션 종료 (변경 없음)
         try:
             session = ChatSession.objects.get(session_key=session_key)
             session.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ChatSession.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
 
 class ChatbotMessageView(APIView):
     def post(self, request, session_key):

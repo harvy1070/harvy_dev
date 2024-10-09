@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
-import uuid
+# import uuid
 
 # 사용자 생성 로직 관리(일반유저, super유저 구분)
 class UserInfoManager(BaseUserManager):
@@ -129,7 +129,7 @@ class ChatSession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     session_key = models.CharField(max_length=40, unique=True)
     # session_id = models.CharField(max_length=100, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True) # 세션 생성 시간
     last_interaction = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -142,7 +142,9 @@ class ChatSession(models.Model):
 # 각 대화 세션 내 개별 메시지 저장
 class ChatMessage(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-    session_key = models.CharField(max_length=40, unique=True, null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True)
+    user_message = models.TextField(null=True, blank=True)
+    gpt_message = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     last_interaction = models.DateTimeField(auto_now=True, null=True, blank=True)
 
@@ -153,9 +155,15 @@ class ChatMessage(models.Model):
             models.Index(fields=['session_key']),
         ]
         
+    def __str__(self):
+        if self.user:
+            return f"유저로부터의 메시지: {self.user_message[:50]}"  # 유저 메시지의 앞 50글자
+        else:
+            return f"익명 사용자로부터의 메시지: {self.user_message[:50]}"  # 익명 사용자의 메시지
+        
 # 사용자 선호도나 관심사 저장
 class UserPreference(models.Model):
-    user_id = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     pref_pf_types = models.CharField(max_length=100)  # 쉼표로 구분된 선호 포트폴리오 유형
     pref_tech = models.TextField()  # 선호하는 기술 스택
     last_updated = models.DateTimeField(auto_now=True)

@@ -36,12 +36,15 @@ export default {
         };
     },
     computed: {
-        ...mapState('chatbot', ['messages', 'sessionId']),
+        ...mapState('chatbot', ['messages', 'sessionKey']),
     },
     methods: {
         ...mapActions('chatbot', ['sendMessageToBackend', 'initSession']),
         async sendMessage() {
             if (this.userInput.trim()) {
+                if (!this.sessionKey) {
+                    await this.initSession();
+                }
                 await this.sendMessageToBackend({ message: this.userInput });
                 this.userInput = '';
                 this.$nextTick(() => {
@@ -54,8 +57,9 @@ export default {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         },
     },
-    mounted() {
-        this.initSession();
+    async mounted() {
+        // async 추가
+        await this.initSession(); // await 추가
     },
 };
 </script>

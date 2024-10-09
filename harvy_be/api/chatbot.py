@@ -7,7 +7,8 @@ from django.db.models import Q
 from .similarity_utils import is_similar
 import os
 from django.db.models import Prefetch
-import uuid
+import logging
+from django.contrib.sessions.models import Session
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
@@ -16,27 +17,42 @@ MAX_INPUT_LEN = 500
 MAX_OUTPUT_LEN = 1000
 MAX_TOKENS = 500
 
+logger = logging.getLogger(__name__)
+
 class Chatbot:
     def __init__(self, request):
         self.request = request
         self.user = request.user if request.user.is_authenticated else None
+        logger.debug(f"사용자 초기화 중: {self.user}")
         self.session = self._get_or_create_session()
 
     def _get_or_create_session(self):
-        if self.user:
-            session, created = ChatSession.objects.get_or_create(
-                user=self.user,
-                defaults={'session_key': self.request.session.session_key}
-            )
-        else:
-            session_key = self.request.session.session_key
-            if not session_key:
+        try:
+            if not self.request.session.session_key:
                 self.request.session.create()
-                session_key = self.request.session.session_key
-            session, created = ChatSession.objects.get_or_create(
-                session_key=session_key
+            
+            session_key = self.request.session.session_key
+            
+            # Django Session 객체 가져오기 또는 생성
+            django_session = Session.objects.get(session_key=session_key)
+            
+            # ChatSession 객체 가져오기 또는 생성
+            chat_session, created = ChatSession.objects.get_or_create(
+                session_key=session_key,
+                defaults={'user': self.user}
             )
-        return session
+            
+            return chat_session
+        except Session.DoesNotExist:
+            # 세션이 존재하지 않는 경우 새로 생성
+            self.request.session.create()
+            session_key = self.request.session.session_key
+            django_session = Session.objects.get(session_key=session_key)
+            chat_session = ChatSession.objects.create(session_key=session_key, user=self.user)
+            return chat_session
+        except Exception as e:
+            logger.error(f"Error in _get_or_create_session: {str(e)}", exc_info=True)
+            raise
 
     def process_message(self, message):
         try:
