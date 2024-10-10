@@ -21,6 +21,11 @@ class Migration(migrations.Migration):
             old_name='user_id',
             new_name='user',
         ),
+        migrations.AddField(
+            model_name='chatsession',
+            name='session_key',
+            field=models.CharField(max_length=40, unique=True, null=True),
+        ),
         migrations.RunPython(set_default_session_key),
         migrations.AlterField(
             model_name='chatsession',
