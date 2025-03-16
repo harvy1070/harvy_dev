@@ -9,7 +9,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
 url = urlparse(REDIS_URL)
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'harvy-dev-f064f0b3b0ee.herokuapp.com,localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'harvy-dev-f064f0b3b0ee.herokuapp.com,localhost, 127.0.0.1, harvy.kr, www.harvy.kr').split(',')
 
 # heroku, db 연동용으로 수정
 DATABASES = {

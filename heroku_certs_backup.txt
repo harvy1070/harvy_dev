@@ -1,0 +1,2 @@
+harvy-dev has no SSL certificates.
+Use heroku certs:add CRT KEY to add one.

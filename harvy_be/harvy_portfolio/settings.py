@@ -104,6 +104,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'harvy_be.middleware.CustomLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'harvy_portfolio.urls'
