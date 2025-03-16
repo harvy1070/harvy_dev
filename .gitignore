@@ -26,3 +26,8 @@ db.sqlite3
 
 # pdf파일 관리
 harvy_be/pdf_files/
+
+# key 관리
+heroku_certs_backup.txt
+heroku_certs_info_backup.xtx
+heroku_config_backup.txt
