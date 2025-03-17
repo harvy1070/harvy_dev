@@ -9,7 +9,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
 url = urlparse(REDIS_URL)
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'harvy-dev-f064f0b3b0ee.herokuapp.com,localhost,127.0.0.1,harvy.kr,www.harvy.kr').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'harvy-dev-f064f0b3b0ee.herokuapp.com,localhost,127.0.0.1,harvy.kr,www.harvy.kr,api.harvy.kr').split(',')
 
 # heroku, db 연동용으로 수정
 DATABASES = {
@@ -49,14 +49,15 @@ STATICFILES_DIRS = []
 if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
     MIDDLEWARE = ['whitenoise.middleware.WhiteNoiseMiddleware'] + MIDDLEWARE
 
-CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
-# CORS_ALLOWED_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'https://harvy13.netlify.app,https://harvy.kr,https://www.harvy.kr').split(',')
-# CORS_ALLOWED_ORIGINS = [
-#     'https://harvy13.netlify.app',
-#     'http://harvy.kr',
-#     'http://www.harvy.kr'
-# ]
+# CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
+CORS_ALLOWED_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'https://harvy13.netlify.app,https://harvy.kr,https://www.harvy.kr,https://api.harvy.kr').split(',')
+CORS_ALLOWED_ORIGINS = [
+    'https://harvy13.netlify.app',
+    'https://harvy.kr',
+    'https://www.harvy.kr'
+    'https://api.harvy.kr'
+]
 
 # Security settings
 SECURE_SSL_REDIRECT = True
