@@ -3,7 +3,7 @@ import store from '@/store';
 
 // 환경에 따라 API 기본 URL 설정
 // const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'https://harvy-dev-f064f0b3b0ee.herokuapp.com/api/';
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'https://www.harvy.kr/api/';
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'https://api.harvy.kr/';
 // 임시 세팅
 // const API_BASE_URL =
 //     process.env.VUE_APP_API_BASE_URL || window.location.protocol + '//' + window.location.host + '/api/';
