@@ -55,7 +55,7 @@ CORS_ALLOWED_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     'https://harvy13.netlify.app',
     'https://harvy.kr',
-    'https://www.harvy.kr'
+    'https://www.harvy.kr',
     'https://api.harvy.kr'
 ]
 
