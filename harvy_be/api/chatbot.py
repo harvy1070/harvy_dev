@@ -11,7 +11,13 @@ import logging
 from django.contrib.sessions.models import Session
 
 from django.db.models import Count
-from konlpy.tag import Okt
+try:
+    from konlpy.tag import Okt
+    OKT_AVAILABLE = True
+except ImportError:
+    OKT_AVAILABLE = False
+    print("Warning: konlpy module not found. Chatbot functionality will be limited.")
+# from konlpy.tag import Okt
 import traceback
 from django.http import JsonResponse
 
@@ -31,7 +37,11 @@ class Chatbot:
         self.user = request.user if request.user.is_authenticated else None
         logger.debug(f"사용자 초기화 중: {self.user}")
         self.session = self._get_or_create_session()
-        self.okt = Okt()
+        # konlpy가 있을 때만 Okt 초기화
+        if OKT_AVAILABLE:
+            self.okt = Okt()
+        else:
+            self.okt = None
         self.stop_words = self.load_stop_words()
         self.conversation_history = []
 
@@ -176,8 +186,14 @@ class Chatbot:
     
     # 대화내용에서 Keyword 추출
     def extract_keywords(self, text):
-        nouns = self.okt.nouns(text)
-        return [word for word in nouns if word not in self.stop_words]
+        if self.okt is None:
+            # konlpy 없을 때 대체 구현 - 단순 공백 기준 분리
+            words = text.split()
+            return [word for word in words if word not in self.stop_words]
+        else:
+            # 기존 구현
+            nouns = self.okt.nouns(text)
+            return [word for word in nouns if word not in self.stop_words]
     
     def calc_pf_scores(self, keywords):
         return PortfolioKeyword.objects.filter(keyword__in=keywords).values('portfolio').annotate(score=Count('keyword')).order_by('-score')
