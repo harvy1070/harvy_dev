@@ -1,0 +1,12 @@
+python3-dev
+build-essential
+g++
+default-jdk
+openjdk-11-jdk
+libasound2-data
+libasound2
+libgl1
+libxi6
+libxrender1
+libfontconfig1
+libxtst6

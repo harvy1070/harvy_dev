@@ -12,8 +12,8 @@ from django.contrib.sessions.models import Session
 
 from django.db.models import Count
 try:
-    from konlpy.tag import Okt
-    OKT_AVAILABLE = True
+    # from konlpy.tag import Okt
+    OKT_AVAILABLE = False
 except ImportError:
     OKT_AVAILABLE = False
     print("Warning: konlpy module not found. Chatbot functionality will be limited.")
