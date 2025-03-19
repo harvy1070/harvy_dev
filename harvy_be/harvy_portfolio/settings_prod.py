@@ -104,6 +104,8 @@ RQ_QUEUES = {
     'default': {
         'URL': REDIS_URL,
         'DEFAULT_TIMEOUT': 360,
+        'SSL': True,
+        'SSL_CERT_REQS': None,
     }
 }
 
@@ -114,6 +116,8 @@ CACHES = {
         "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "SSL": True,
+            "SSL_CERT_REQS": None
         }
     }
 }
